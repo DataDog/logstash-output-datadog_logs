@@ -1,0 +1,6 @@
+Component,Origin,License
+bundler,http://bundler.io,MIT
+logstash-core-plugin-api,http://www.elastic.co/guide/en/logstash/current/index.html,Apache License (2.0)
+logstash-core,http://www.elastic.co/guide/en/logstash/current/index.html,Apache License (2.0)
+rake,https://ruby.github.io/rake,MIT
+rspec,http://rspec.info/,MIT

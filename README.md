@@ -1,5 +1,5 @@
 # logstash-output-datadog_logs
-*Link to the [Datadog documentation](https://docs.datadoghq.com/logs)*
+*Link to the [Datadog documentation](https://help.datadoghq.com/hc/en-us/articles/115005086506-How-to-Send-Logs-to-Datadog-via-External-Log-Shippers)*
 
 DatadogLogs lets you send logs to Datadog based on LogStash events.
 

@@ -26,7 +26,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
     client_socket = nil
     @codec.on_event do |event, payload|
-      # open a connection if needed and send JSON payload      
+      # open a connection if needed and send JSON payload
       begin
         client_socket = new_client_socket unless client_socket
         r,w,e = IO.select([client_socket], [client_socket], [client_socket], nil)
@@ -34,7 +34,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         if w.any?
           # send message to Datadog
           message = "#{@api_key} #{payload}\n"
-          client_socket.syswrite(message)
+          client_socket.puts(message)
           @logger.debug("Sent", :payload => payload)
         end # w.any?
       rescue => e
@@ -56,8 +56,8 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   private
   def new_client_socket
-    # open a secure connection with Datadog    
-    begin      
+    # open a secure connection with Datadog
+    begin
       socket = TCPSocket.new @host, @port
       sslSocket = OpenSSL::SSL::SSLSocket.new socket
       sslSocket.connect

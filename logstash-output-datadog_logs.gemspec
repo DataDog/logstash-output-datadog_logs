@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'logstash-output-datadog_logs'
-  s.version       = '0.2.0'
+  s.version       = '0.2.1'
   s.licenses      = ['Apache-2.0']
   s.summary       = 'DatadogLogs lets you send logs to Datadog based on LogStash events.'
   s.homepage      = 'https://www.datadoghq.com/'

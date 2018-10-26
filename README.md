@@ -17,7 +17,7 @@ Configure `datadog_logs` plugin with your Datadog API key:
 ```
 output {
     datadog_logs {
-        api_key => "<your_datadog_api_key>"
+        api_key => "<DATADOG_API_KEY>"
     }
 }
 

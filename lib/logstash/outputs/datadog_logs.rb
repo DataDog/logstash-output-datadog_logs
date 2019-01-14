@@ -21,6 +21,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   config :port,        :validate => :integer, :default  => 10516
   config :use_ssl,     :validate => :string,  :default  => true
   config :max_backoff, :validate => :integer, :default  => 30
+  config :max_retries, :validate => :integer, :default  => 5
 
   public
   def register
@@ -29,14 +30,18 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     @codec.on_event do |event, payload|
       retries = 0
       begin
-        if retries > 0
-          backoff = 2 ** retries
-          backoff = max_backoff unless backoff < max_backoff
-          sleep backoff
+        if retries < max_retries
+          if retries > 0
+            backoff = 2 ** retries
+            backoff = max_backoff unless backoff < max_backoff
+            sleep backoff
+          end
+          client ||= new_client
+          message = "#{@api_key} #{payload}\n"
+          client.write(message)
+        else
+          @logger.warn("Max number of retries reached, dropping the payload", :payload => payload)
         end
-        client ||= new_client
-        message = "#{@api_key} #{payload}\n"
-        client.write(message)
       rescue => e
         # close connection and always retry
         @logger.warn("Could not send message, retrying", :exception => e, :backtrace => e.backtrace)

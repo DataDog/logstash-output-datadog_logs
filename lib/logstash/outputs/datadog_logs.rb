@@ -17,11 +17,11 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   # Datadog configuration parameters
   config :api_key,     :validate => :string,  :required => true
-  config :host,        :validate => :string,  :default  => 'intake.logs.datadoghq.com'
-  config :port,        :validate => :integer, :default  => 10516
-  config :use_ssl,     :validate => :string,  :default  => true
-  config :max_backoff, :validate => :integer, :default  => 30
-  config :max_retries, :validate => :integer, :default  => 5
+  config :host,        :validate => :string,  :required => true, :default  => 'intake.logs.datadoghq.com'
+  config :port,        :validate => :number,  :required => true, :default  => 10516
+  config :use_ssl,     :validate => :boolean, :required => true, :default  => true
+  config :max_backoff, :validate => :number,  :required => true, :default  => 30
+  config :max_retries, :validate => :number,  :required => true, :default  => 5
 
   public
   def register

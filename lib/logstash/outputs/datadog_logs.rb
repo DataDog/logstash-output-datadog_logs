@@ -15,60 +15,63 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   default :codec, "json"
 
-  # Your Datadog API key
-  config :api_key, :validate => :string, :required => true
+  # Datadog configuration parameters
+  config :api_key,     :validate => :string,  :required => true
+  config :host,        :validate => :string,  :required => true, :default  => 'intake.logs.datadoghq.com'
+  config :port,        :validate => :number,  :required => true, :default  => 10516
+  config :use_ssl,     :validate => :boolean, :required => true, :default  => true
+  config :max_backoff, :validate => :number,  :required => true, :default  => 30
+  config :max_retries, :validate => :number,  :required => true, :default  => 5
 
   public
   def register
     require "socket"
-    @host = "intake.logs.datadoghq.com"
-    @port = 10516
-
-    client_socket = nil
+    client = nil
     @codec.on_event do |event, payload|
-      # open a connection if needed and send JSON payload
+      retries = 0
       begin
-        client_socket = new_client_socket unless client_socket
-        r,w,e = IO.select([client_socket], [client_socket], [client_socket], nil)
-        client_socket.sysread(16384) if r.any?
-        if w.any?
-          # send message to Datadog
+        if retries < max_retries
+          if retries > 0
+            backoff = 2 ** retries
+            backoff = max_backoff unless backoff < max_backoff
+            sleep backoff
+          end
+          client ||= new_client
           message = "#{@api_key} #{payload}\n"
-          client_socket.puts(message)
-          @logger.debug("Sent", :payload => payload)
-        end # w.any?
+          client.write(message)
+        else
+          @logger.warn("Max number of retries reached, dropping the payload", :payload => payload)
+        end
       rescue => e
         # close connection and always retry
-        @logger.warn("TCP exception", :exception => e, :backtrace => e.backtrace)
-        client_socket.close rescue nil
-        client_socket = nil
-        sleep 5
+        @logger.warn("Could not send message, retrying", :exception => e, :backtrace => e.backtrace)
+        client.close rescue nil
+        client = nil
+        retries += 1
         retry
-      end # begin
-    end # @codec.on_event
-  end # def register
+      end
+    end
+  end
 
   public
   def receive(event)
     # handle new event
     @codec.encode(event)
-  end # def receive
+  end
 
   private
-  def new_client_socket
+  def new_client
     # open a secure connection with Datadog
-    begin
+    if @use_ssl
+      @logger.info("Starting SSL connection", :host => @host, :port => @port)
       socket = TCPSocket.new @host, @port
       sslSocket = OpenSSL::SSL::SSLSocket.new socket
       sslSocket.connect
-      @logger.debug("Started SSL connection", :host => @host)
       return sslSocket
-    rescue => e
-      # always retry when the connection failed
-      @logger.warn("SSL exception", :exception => e, :backtrace => e.backtrace)
-      sleep 5
-      retry
-    end # begin
-  end # def new_client_socket
+    else
+      @logger.info("Starting plaintext connection", :host => @host, :port => @port)
+      return TCPSocket.new @host, @port
+    end
+  end
 
-end # class LogStash::Outputs::DatadogLogs
+end

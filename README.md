@@ -20,7 +20,6 @@ output {
         api_key => "<DATADOG_API_KEY>"
     }
 }
-
 ```
 
 ## Need Help?

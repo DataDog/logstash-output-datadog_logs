@@ -28,27 +28,23 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     require "socket"
     client = nil
     @codec.on_event do |event, payload|
+      message = "#{@api_key} #{payload}\n"
       retries = 0
+      backoff = 1
       begin
-        if retries < max_retries
-          if retries > 0
-            backoff = 2 ** retries
-            backoff = max_backoff unless backoff < max_backoff
-            sleep backoff
-          end
-          client ||= new_client
-          message = "#{@api_key} #{payload}\n"
-          client.write(message)
-        else
-          @logger.warn("Max number of retries reached, dropping the payload", :payload => payload)
-        end
+        client ||= new_client
+        client.write(message)
       rescue => e
-        # close connection and always retry
-        @logger.warn("Could not send message, retrying", :exception => e, :backtrace => e.backtrace)
+        @logger.warn("Could not send payload", :exception => e, :backtrace => e.backtrace)
         client.close rescue nil
         client = nil
-        retries += 1
-        retry
+        if retries < max_retries || max_retries < 0
+          sleep backoff
+          backoff = 2 * backoff unless backoff > max_backoff
+          retries += 1
+          retry
+        end
+        @logger.warn("Max number of retries reached, dropping the payload", :payload => payload, :max_retries => max_retries)
       end
     end
   end

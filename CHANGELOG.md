@@ -1,3 +1,6 @@
+## 0.3.1
+  - Make sure that we can disable retries
+
 ## 0.3.0
   - Added support for proxy settings
 

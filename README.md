@@ -54,6 +54,7 @@ Here is the full list of parameters that you can use to configure the logstash p
 | **use_ssl** | If true, the agent initializes a secure connection to Datadog. In clear TCP otherwise.  | true |
 | **max_retries** | The number of retries before the output plugin stops | 5 |
 
+The default configuration listed above is for US-based sites that will send logs over an SSL-encrypted connection. For EU sites and unencrypted connection options, see the [Datadog endpoint documentation](https://docs.datadoghq.com/logs/?tab=eusite#datadog-logs-endpoints).
 
 ## Need Help?
 

@@ -12,7 +12,7 @@ logstash-plugin install logstash-output-datadog_logs
 
 ## How to use it?
 
-The `datadog_logs` plugin is configured by default to send logs over to a US endpoint over an SSL-encrypted TCP connection. 
+The `datadog_logs` plugin is configured by default to send logs to a US endpoint over an SSL-encrypted TCP connection. 
 Configure the plugin with your Datadog API key:
 
 ```

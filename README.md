@@ -12,16 +12,8 @@ logstash-plugin install logstash-output-datadog_logs
 
 ## How to use it?
 
-|  Property   |  Description                                                             |  Default value |
-|-------------|--------------------------------------------------------------------------|----------------|
-| **api_key** | The API key of your Datadog platform | nil |
-| **host** | Proxy endpoint when logs are not directly forwarded to Datadog | intake.logs.datadoghq.com |
-| **port** | Proxy port when logs are not directly forwarded to Datadog | 10516 |
-| **use_ssl** | If true, the agent initializes a secure connection to Datadog. In clear TCP otherwise.  | true |
-| **max_retries** | The number of retries before the output plugin stops | 5 |
-
-The default configuration listed above is for US-based sites that will send logs over an SSL-encrypted connection.
-Configure the `datadog_logs` plugin with your Datadog API key:
+The `datadog_logs` plugin is configured by default to send logs over to a US endpoint over an SSL-encrypted TCP connection. 
+Configure the plugin with your Datadog API key:
 
 ```
 output {
@@ -31,7 +23,8 @@ output {
 }
 ```
 
-For EU sites you will need to pass `host` and `port` options for the correct endpoint:
+To send logs to the Datadog's EU endpoint, override default `host` and `port` options:
+
 ```
 output {
     datadog_logs {
@@ -41,6 +34,16 @@ output {
     }
 }
 ```
+
+### Configuration properties
+
+|  Property   |  Description                                                             |  Default value |
+|-------------|--------------------------------------------------------------------------|----------------|
+| **api_key** | The API key of your Datadog platform | nil |
+| **host** | Proxy endpoint when logs are not directly forwarded to Datadog | intake.logs.datadoghq.com |
+| **port** | Proxy port when logs are not directly forwarded to Datadog | 10516 |
+| **use_ssl** | If true, the agent initializes a secure connection to Datadog. In clear TCP otherwise.  | true |
+| **max_retries** | The number of retries before the output plugin stops | 5 |
 
 For additional options, see the [Datadog endpoint documentation](https://docs.datadoghq.com/logs/?tab=eusite#datadog-logs-endpoints)
 

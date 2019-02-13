@@ -12,7 +12,8 @@ logstash-plugin install logstash-output-datadog_logs
 
 ## How to use it?
 
-Configure `datadog_logs` plugin with your Datadog API key:
+The `datadog_logs` plugin is configured by default to send logs to a US endpoint over an SSL-encrypted TCP connection. 
+Configure the plugin with your Datadog API key:
 
 ```
 output {
@@ -21,6 +22,30 @@ output {
     }
 }
 ```
+
+To send logs to the Datadog's EU endpoint, override default `host` and `port` options:
+
+```
+output {
+    datadog_logs {
+        api_key => "<DATADOG_API_KEY>"
+        host => "tcp-intake.logs.datadoghq.eu"
+        port => "443"
+    }
+}
+```
+
+### Configuration properties
+
+|  Property   |  Description                                                             |  Default value |
+|-------------|--------------------------------------------------------------------------|----------------|
+| **api_key** | The API key of your Datadog platform | nil |
+| **host** | Proxy endpoint when logs are not directly forwarded to Datadog | intake.logs.datadoghq.com |
+| **port** | Proxy port when logs are not directly forwarded to Datadog | 10516 |
+| **use_ssl** | If true, the agent initializes a secure connection to Datadog. In clear TCP otherwise.  | true |
+| **max_retries** | The number of retries before the output plugin stops | 5 |
+
+For additional options, see the [Datadog endpoint documentation](https://docs.datadoghq.com/logs/?tab=eusite#datadog-logs-endpoints)
 
 ## Add metadata to your logs
 
@@ -39,21 +64,6 @@ filter {
   }
 }
 ```
-
-### Properties
-
-To go deeper on the plugin configuration.
-Here is the full list of parameters that you can use to configure the logstash plugin:
-
-
-|  Property   |  Description                                                             |  Default value |
-|-------------|--------------------------------------------------------------------------|----------------|
-| **api_key** | The API key of your Datadog platform | nil |
-| **host** | Proxy endpoint when logs are not directly forwarded to Datadog | intake.logs.datadoghq.com |
-| **port** | Proxy port when logs are not directly forwarded to Datadog | 10516 |
-| **use_ssl** | If true, the agent initializes a secure connection to Datadog. In clear TCP otherwise.  | true |
-| **max_retries** | The number of retries before the output plugin stops | 5 |
-
 
 ## Need Help?
 

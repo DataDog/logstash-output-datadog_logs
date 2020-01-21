@@ -16,12 +16,15 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   default :codec, "json"
 
   # Datadog configuration parameters
-  config :api_key,     :validate => :string,  :required => true
-  config :host,        :validate => :string,  :required => true, :default  => 'intake.logs.datadoghq.com'
-  config :port,        :validate => :number,  :required => true, :default  => 10516
-  config :use_ssl,     :validate => :boolean, :required => true, :default  => true
-  config :max_backoff, :validate => :number,  :required => true, :default  => 30
-  config :max_retries, :validate => :number,  :required => true, :default  => 5
+  config :api_key, :validate => :string, :required => true
+  config :host, :validate => :string, :required => true, :default => 'http-intake.logs.datadoghq.com'
+  config :port, :validate => :number, :required => true, :default => 443
+  config :use_ssl, :validate => :boolean, :required => true, :default => true
+  config :max_backoff, :validate => :number, :required => true, :default => 30
+  config :max_retries, :validate => :number, :required => true, :default => 5
+  config :use_http, :validate => :boolean, :required => false, :default => true
+  config :use_compression, :validate => :boolean, :required => false, :default => true
+  config :compression_level, :validate => :number, :required => false, :default => 6
 
   public
   def register

@@ -6,10 +6,15 @@
 # encoding: utf-8
 require "logstash/outputs/base"
 require "logstash/namespace"
+require "zlib"
+
 
 # DatadogLogs lets you send logs to Datadog
 # based on LogStash events.
 class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
+
+  # Respect limit documented at https://docs.datadoghq.com/agent/logs/?tab=tailexistingfiles#send-logs-over-https
+  DD_MAX_BATCH_SIZE = 200
 
   config_name "datadog_logs"
 
@@ -17,7 +22,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   # Datadog configuration parameters
   config :api_key, :validate => :string, :required => true
-  config :host, :validate => :string, :required => true, :default => 'http-intake.logs.datadoghq.com'
+  config :host, :validate => :string, :required => true, :default => "http-intake.logs.datadoghq.com"
   config :port, :validate => :number, :required => true, :default => 443
   config :use_ssl, :validate => :boolean, :required => true, :default => true
   config :max_backoff, :validate => :number, :required => true, :default => 30
@@ -25,51 +30,169 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   config :use_http, :validate => :boolean, :required => false, :default => true
   config :use_compression, :validate => :boolean, :required => false, :default => true
   config :compression_level, :validate => :number, :required => false, :default => 6
+  config :no_ssl_validation, :validate => :boolean, :required => false, :default => false
 
+  # Register the plugin to logstash
   public
   def register
-    require "socket"
-    client = nil
-    @codec.on_event do |event, payload|
-      message = "#{@api_key} #{payload}\n"
-      retries = 0
+    client ||= new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression)
+    @codec.on_event do |_, payload|
+      payload = encode(payload, @use_http, @api_key)
+      if @use_compression and @use_http
+        payload = gzip_compress(payload, @compression_level)
+      end
+      client.send_retries(payload, @max_retries, @max_backoff)
+    end
+  end
+
+  # Process a set of log events
+  public
+  def multi_receive(events)
+    return if events.empty?
+    if @use_http
+      batches = batch_events(events, DD_MAX_BATCH_SIZE)
+      batches.each do |batched_event|
+        @codec.encode(batched_event)
+      end
+    else
+      events.each do |event|
+        @codec.encode(event)
+      end
+    end
+  end
+
+  # Encode payload for Datadog to the right format (no-op for HTTP)
+  def encode(payload, use_http, api_key)
+    if not use_http
+      return "#{api_key} #{payload}"
+    else
+      return payload
+    end
+  end
+
+  # Group events in batches
+  def batch_events(events, max_batch_size)
+    batches = []
+    current_batch = []
+    events.each_with_index do |event, i|
+      if i > 0 and i % max_batch_size == 0
+        batches << current_batch
+        current_batch = []
+      end
+      current_batch << event
+    end
+    batches << current_batch
+    return batches
+  end
+
+  # Compress logs with GZIP
+  def gzip_compress(payload, compression_level)
+    gz = StringIO.new
+    gz.set_encoding("BINARY")
+    z = Zlib::GzipWriter.new(gz, compression_level)
+    z.write(payload)
+    z.close
+    gz.string
+  end
+
+  # Build a new transport client
+  def new_client(logger, api_key, use_http, use_ssl, no_ssl_validation, host, port, use_compression)
+    if use_http
+      return DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key
+    else
+      return DatadogTCPClient.new logger, use_ssl, no_ssl_validation, host, port
+    end
+  end
+
+  class RetryableError < StandardError;
+  end
+
+  class DatadogClient
+    def send_retries(payload, max_retries, max_backoff)
       backoff = 1
+      retries = 0
       begin
-        client ||= new_client
-        client.write(message)
-      rescue => e
-        @logger.warn("Could not send payload", :exception => e, :backtrace => e.backtrace)
-        client.close rescue nil
-        client = nil
+        send(payload)
+      rescue RetryableError => e
         if retries < max_retries || max_retries < 0
+          @logger.warn("Retrying ", :exception => e, :backtrace => e.backtrace)
           sleep backoff
           backoff = 2 * backoff unless backoff > max_backoff
           retries += 1
           retry
         end
-        @logger.warn("Max number of retries reached, dropping the payload", :payload => payload, :max_retries => max_retries)
+      end
+    end
+
+    def send(payload)
+    end
+  end
+
+  class DatadogHTTPClient < DatadogClient
+    require "manticore"
+
+    def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key)
+      @logger = logger
+      protocol = use_ssl ? "https" : "http"
+      @url = "#{protocol}://#{host}:#{port.to_s}/v1/input/#{api_key}"
+      @headers = {"Content-Type" => "application/json"}
+      if use_compression
+        @headers["Content-Encoding"] = "gzip"
+      end
+      logger.info("Starting HTTP connection to #{protocol}://#{@host}:#{port.to_s}")
+      config = {}
+      config[:ssl][:verify] = :disable if no_ssl_validation
+      @client = Manticore::Client.new(config)
+    end
+
+    def send(payload)
+      response = @client.post(@url, :body => payload, :headers => @headers).call
+      if response.code >= 500
+        raise RetryableError.new "Unable to send payload: #{response.code} #{response.body}"
+      end
+      if response.code >= 400
+        @logger.error("Unable to send payload due to client error: #{response.code} #{response.body}")
       end
     end
   end
 
-  public
-  def receive(event)
-    # handle new event
-    @codec.encode(event)
-  end
+  class DatadogTCPClient < DatadogClient
+    require "socket"
 
-  private
-  def new_client
-    # open a secure connection with Datadog
-    if @use_ssl
-      @logger.info("Starting SSL connection", :host => @host, :port => @port)
-      socket = TCPSocket.new @host, @port
-      sslSocket = OpenSSL::SSL::SSLSocket.new socket
-      sslSocket.connect
-      return sslSocket
-    else
-      @logger.info("Starting plaintext connection", :host => @host, :port => @port)
-      return TCPSocket.new @host, @port
+    def initialize(logger, use_ssl, no_ssl_validation, host, port)
+      @logger = logger
+      @use_ssl = use_ssl
+      @no_ssl_validation = no_ssl_validation
+      @host = host
+      @port = port
+    end
+
+    def connect
+      if @use_ssl
+        @logger.info("Starting SSL connection #{@host} #{@port}")
+        socket = TCPSocket.new @host, @port
+        sslContext = OpenSSL::SSL::SSLContext.new
+        if @no_ssl_validation
+          sslContext.set_params({:verify_mode => OpenSSL::SSL::VERIFY_NONE})
+        end
+        sslSocket = OpenSSL::SSL::SSLSocket.new socket, sslContext
+        sslSocket.connect
+        return sslSocket
+      else
+        @logger.info("Starting plaintext connection #{@host} #{@port}")
+        return TCPSocket.new @host, @port
+      end
+    end
+
+    def send(payload)
+      begin
+        @socket ||= connect
+        @socket.puts(payload)
+      rescue => e
+        @socket.close rescue nil
+        @socket = nil
+        raise RetryableError.new "Unable to send payload: #{e.message}."
+      end
     end
   end
 

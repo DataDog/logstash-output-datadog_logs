@@ -1,3 +1,7 @@
+## 0.4.0
+  - Enable HTTP forwarding for logs
+  - Provide an option to disable SSL hostname verification for HTTPS
+
 ## 0.3.1
   - Make sure that we can disable retries
 

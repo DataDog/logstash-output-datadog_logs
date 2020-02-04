@@ -14,7 +14,8 @@ require "zlib"
 class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   # Respect limit documented at https://docs.datadoghq.com/agent/logs/?tab=tailexistingfiles#send-logs-over-https
-  DD_MAX_BATCH_SIZE = 200
+  DD_MAX_BATCH_LENGTH = 200
+  DD_MAX_BATCH_SIZE = 1000000
 
   config_name "datadog_logs"
 
@@ -50,7 +51,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   def multi_receive(events)
     return if events.empty?
     if @use_http
-      batches = batch_events(events, DD_MAX_BATCH_SIZE)
+      batches = batch_events(events, DD_MAX_BATCH_LENGTH, DD_MAX_BATCH_SIZE)
       batches.each do |batched_event|
         @codec.encode(batched_event)
       end
@@ -64,25 +65,28 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   # Encode payload for Datadog to the right format (no-op for HTTP)
   def encode(payload, use_http, api_key)
     if not use_http
-      return "#{api_key} #{payload}"
+      "#{api_key} #{payload}"
     else
-      return payload
+      payload
     end
   end
 
   # Group events in batches
-  def batch_events(events, max_batch_size)
+  def batch_events(events, max_batch_length, max_request_size)
     batches = []
     current_batch = []
+    current_batch_size = 0
     events.each_with_index do |event, i|
-      if i > 0 and i % max_batch_size == 0
+      if (i > 0 and i % max_batch_length == 0) or (current_batch_size > max_request_size)
         batches << current_batch
         current_batch = []
+        current_batch_size = 0
       end
+      current_batch_size += event.get('message').bytesize
       current_batch << event
     end
     batches << current_batch
-    return batches
+    batches
   end
 
   # Compress logs with GZIP
@@ -90,17 +94,20 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     gz = StringIO.new
     gz.set_encoding("BINARY")
     z = Zlib::GzipWriter.new(gz, compression_level)
-    z.write(payload)
-    z.close
+    begin
+      z.write(payload)
+    ensure
+      z.close
+    end
     gz.string
   end
 
   # Build a new transport client
   def new_client(logger, api_key, use_http, use_ssl, no_ssl_validation, host, port, use_compression)
     if use_http
-      return DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key
+      DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key
     else
-      return DatadogTCPClient.new logger, use_ssl, no_ssl_validation, host, port
+      DatadogTCPClient.new logger, use_ssl, no_ssl_validation, host, port
     end
   end
 
@@ -139,7 +146,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       if use_compression
         @headers["Content-Encoding"] = "gzip"
       end
-      logger.info("Starting HTTP connection to #{protocol}://#{@host}:#{port.to_s}")
+      logger.info("Starting HTTP connection to #{protocol}://#{host}:#{port.to_s} with compression " + (use_compression ? "enabled" : "disabled"))
       config = {}
       config[:ssl][:verify] = :disable if no_ssl_validation
       @client = Manticore::Client.new(config)
@@ -171,16 +178,16 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       if @use_ssl
         @logger.info("Starting SSL connection #{@host} #{@port}")
         socket = TCPSocket.new @host, @port
-        sslContext = OpenSSL::SSL::SSLContext.new
+        ssl_context = OpenSSL::SSL::SSLContext.new
         if @no_ssl_validation
-          sslContext.set_params({:verify_mode => OpenSSL::SSL::VERIFY_NONE})
+          ssl_context.set_params({:verify_mode => OpenSSL::SSL::VERIFY_NONE})
         end
-        sslSocket = OpenSSL::SSL::SSLSocket.new socket, sslContext
-        sslSocket.connect
-        return sslSocket
+        ssl_context = OpenSSL::SSL::SSLSocket.new socket, sslContext
+        ssl_context.connect
+        ssl_context
       else
         @logger.info("Starting plaintext connection #{@host} #{@port}")
-        return TCPSocket.new @host, @port
+        TCPSocket.new @host, @port
       end
     end
 

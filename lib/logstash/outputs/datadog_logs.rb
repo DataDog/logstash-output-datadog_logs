@@ -16,6 +16,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   # Respect limit documented at https://docs.datadoghq.com/agent/logs/?tab=tailexistingfiles#send-logs-over-https
   DD_MAX_BATCH_LENGTH = 200
   DD_MAX_BATCH_SIZE = 1000000
+  DD_TRUNCATION_SUFFIX = "...TRUNCATED..."
 
   config_name "datadog_logs"
 
@@ -36,57 +37,87 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   # Register the plugin to logstash
   public
   def register
-    client ||= new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression)
-    @codec.on_event do |_, payload|
-      payload = encode(payload, @use_http, @api_key)
-      if @use_compression and @use_http
-        payload = gzip_compress(payload, @compression_level)
-      end
-      client.send_retries(payload, @max_retries, @max_backoff)
-    end
+    @client = new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression)
   end
 
-  # Process a set of log events
+  # Entry point of the plugin, receiving a set of Logstash events
   public
   def multi_receive(events)
     return if events.empty?
+    encoded_events = @codec.multi_encode(events)
     if @use_http
-      batches = batch_events(events, DD_MAX_BATCH_LENGTH, DD_MAX_BATCH_SIZE)
+      batches = batch_http_events(encoded_events, DD_MAX_BATCH_LENGTH, DD_MAX_BATCH_SIZE)
       batches.each do |batched_event|
-        @codec.encode(batched_event)
+        process_encoded_payload(format_http_event_batch(batched_event))
       end
     else
-      events.each do |event|
-        @codec.encode(event)
+      encoded_events.each do |encoded_event|
+        process_encoded_payload(format_tcp_event(encoded_event.last, @api_key, DD_MAX_BATCH_SIZE))
       end
     end
   end
 
-  # Encode payload for Datadog to the right format (no-op for HTTP)
-  def encode(payload, use_http, api_key)
-    if not use_http
-      "#{api_key} #{payload}"
-    else
-      payload
+  # Process and send each encoded payload
+  def process_encoded_payload(payload)
+    if @use_compression and @use_http
+      payload = gzip_compress(payload, @compression_level)
     end
+    @client.send_retries(payload, @max_retries, @max_backoff)
   end
 
-  # Group events in batches
-  def batch_events(events, max_batch_length, max_request_size)
+  # Format TCP event
+  def format_tcp_event(payload, api_key, max_request_size)
+    formatted_payload = "#{api_key} #{payload}"
+    if (formatted_payload.bytesize > max_request_size)
+      return truncate(formatted_payload, max_request_size)
+    end
+    formatted_payload
+  end
+
+  # Format HTTP events
+  def format_http_event_batch(batched_events)
+    "[#{batched_events.join(',')}]"
+  end
+
+  # Group HTTP events in batches
+  def batch_http_events(encoded_events, max_batch_length, max_request_size)
     batches = []
     current_batch = []
     current_batch_size = 0
-    events.each_with_index do |event, i|
-      if (i > 0 and i % max_batch_length == 0) or (current_batch_size > max_request_size)
+    encoded_events.each_with_index do |event, i|
+      encoded_event = event.last
+      current_event_size = encoded_event.bytesize
+      # If this unique log size is bigger than the request size, truncate it
+      if current_event_size > max_request_size
+        encoded_event = truncate(encoded_event, max_request_size)
+        current_event_size = encoded_event.bytesize
+      end
+
+      if (i > 0 and i % max_batch_length == 0) or (current_batch_size + current_event_size > max_request_size)
         batches << current_batch
         current_batch = []
         current_batch_size = 0
       end
-      current_batch_size += event.get('message').bytesize
-      current_batch << event
+
+      current_batch_size += encoded_event.bytesize
+      current_batch << encoded_event
     end
     batches << current_batch
     batches
+  end
+
+  # Truncate events over the provided max length, appending a marker when truncated
+  def truncate(event, max_length)
+    if event.length > max_length
+      event = event[0..max_length - 1]
+      event[max(0, max_length - DD_TRUNCATION_SUFFIX.length)..max_length-1] = DD_TRUNCATION_SUFFIX
+      return event
+    end
+    event
+  end
+
+  def max(a, b)
+    a > b ? a : b
   end
 
   # Compress logs with GZIP
@@ -182,7 +213,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         if @no_ssl_validation
           ssl_context.set_params({:verify_mode => OpenSSL::SSL::VERIFY_NONE})
         end
-        ssl_context = OpenSSL::SSL::SSLSocket.new socket, sslContext
+        ssl_context = OpenSSL::SSL::SSLSocket.new socket, ssl_context
         ssl_context.connect
         ssl_context
       else

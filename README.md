@@ -3,6 +3,10 @@
 
 DatadogLogs lets you send logs to Datadog based on LogStash events.
 
+## Requirements
+
+The plugin relies upon the `zlib` library for compressing data.
+
 ## How to install it?
 
 ```bash

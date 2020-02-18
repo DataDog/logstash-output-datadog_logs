@@ -13,9 +13,9 @@ require "zlib"
 # based on LogStash events.
 class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
-  # Respect limit documented at https://docs.datadoghq.com/agent/logs/?tab=tailexistingfiles#send-logs-over-https
-  DD_MAX_BATCH_LENGTH = 200
-  DD_MAX_BATCH_SIZE = 1000000
+  # Respect limit documented at https://docs.datadoghq.com/api/?lang=bash#logs
+  DD_MAX_BATCH_LENGTH = 500
+  DD_MAX_BATCH_SIZE = 5000000
   DD_TRUNCATION_SUFFIX = "...TRUNCATED..."
 
   config_name "datadog_logs"

@@ -40,6 +40,11 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     @client = new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression)
   end
 
+  # Logstash shutdown hook
+  def close
+    @client.close
+  end
+
   # Entry point of the plugin, receiving a set of Logstash events
   public
   def multi_receive(events)
@@ -110,7 +115,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   def truncate(event, max_length)
     if event.length > max_length
       event = event[0..max_length - 1]
-      event[max(0, max_length - DD_TRUNCATION_SUFFIX.length)..max_length-1] = DD_TRUNCATION_SUFFIX
+      event[max(0, max_length - DD_TRUNCATION_SUFFIX.length)..max_length - 1] = DD_TRUNCATION_SUFFIX
       return event
     end
     event
@@ -163,6 +168,11 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     end
 
     def send(payload)
+      raise NotImplementedError, "Datadog transport client should implement the send method"
+    end
+
+    def close
+      raise NotImplementedError, "Datadog transport client should implement the close method"
     end
   end
 
@@ -191,6 +201,10 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       if response.code >= 400
         @logger.error("Unable to send payload due to client error: #{response.code} #{response.body}")
       end
+    end
+
+    def close
+      @client.close
     end
   end
 
@@ -231,6 +245,10 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         @socket = nil
         raise RetryableError.new "Unable to send payload: #{e.message}."
       end
+    end
+
+    def close
+      @socket.close rescue nil
     end
   end
 

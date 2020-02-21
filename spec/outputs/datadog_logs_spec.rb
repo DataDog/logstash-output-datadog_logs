@@ -57,7 +57,7 @@ describe LogStash::Outputs::DatadogLogs do
       actual_events = subject.batch_http_events(input_events, 1, 1000)
       expect(actual_events.length).to eq(2)
       expect(actual_events[0][0]).to eq("dd1")
-      expect(actual_events[0][1]).to eq("dd2")
+      expect(actual_events[1][0]).to eq("dd2")
     end
 
     it "should respect the request size and create two batches of one event" do

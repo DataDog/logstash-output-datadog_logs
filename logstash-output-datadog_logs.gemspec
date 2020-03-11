@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'logstash-output-datadog_logs'
-  s.version       = '0.4.0'
+  s.version       = '0.4.1'
   s.licenses      = ['Apache-2.0']
   s.summary       = 'DatadogLogs lets you send logs to Datadog based on LogStash events.'
   s.homepage      = 'https://www.datadoghq.com/'
@@ -22,4 +22,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'logstash-codec-json'
 
   s.add_development_dependency 'logstash-devutils'
+  s.add_development_dependency 'webmock'
 end

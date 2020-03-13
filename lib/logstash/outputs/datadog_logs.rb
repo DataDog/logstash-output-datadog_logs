@@ -61,7 +61,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
           process_encoded_payload(format_tcp_event(encoded_event.last, @api_key, DD_MAX_BATCH_SIZE))
         end
       end
-    rescue Exception => e
+    rescue => e
       @logger.error("Uncaught processing exception in datadog forwarder #{e.message}")
     end
   end
@@ -168,7 +168,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
           retries += 1
           retry
         end
-      rescue Exception => ex
+      rescue => ex
         @logger.error("Unmanaged exception while sending log to datadog #{ex.message}")
       end
     end
@@ -189,8 +189,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         ::Manticore::Timeout,
         ::Manticore::SocketException,
         ::Manticore::ClientProtocolException,
-        ::Manticore::ResolutionFailure,
-        ::Manticore::SocketTimeout
+        ::Manticore::ResolutionFailure
     ]
 
     def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key)

@@ -1,3 +1,6 @@
+## 0.4.1
+  - Fix HTTP bug when remote server is timing out 
+
 ## 0.4.0
   - Enable HTTP forwarding for logs
   - Provide an option to disable SSL hostname verification for HTTPS

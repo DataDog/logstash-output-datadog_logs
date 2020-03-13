@@ -50,15 +50,19 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   def multi_receive(events)
     return if events.empty?
     encoded_events = @codec.multi_encode(events)
-    if @use_http
-      batches = batch_http_events(encoded_events, DD_MAX_BATCH_LENGTH, DD_MAX_BATCH_SIZE)
-      batches.each do |batched_event|
-        process_encoded_payload(format_http_event_batch(batched_event))
+    begin
+      if @use_http
+        batches = batch_http_events(encoded_events, DD_MAX_BATCH_LENGTH, DD_MAX_BATCH_SIZE)
+        batches.each do |batched_event|
+          process_encoded_payload(format_http_event_batch(batched_event))
+        end
+      else
+        encoded_events.each do |encoded_event|
+          process_encoded_payload(format_tcp_event(encoded_event.last, @api_key, DD_MAX_BATCH_SIZE))
+        end
       end
-    else
-      encoded_events.each do |encoded_event|
-        process_encoded_payload(format_tcp_event(encoded_event.last, @api_key, DD_MAX_BATCH_SIZE))
-      end
+    rescue => e
+      @logger.error("Uncaught processing exception in datadog forwarder #{e.message}")
     end
   end
 
@@ -158,12 +162,14 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         send(payload)
       rescue RetryableError => e
         if retries < max_retries || max_retries < 0
-          @logger.warn("Retrying ", :exception => e, :backtrace => e.backtrace)
+          @logger.warn("Retrying send due to: #{e.message}")
           sleep backoff
           backoff = 2 * backoff unless backoff > max_backoff
           retries += 1
           retry
         end
+      rescue => ex
+        @logger.error("Unmanaged exception while sending log to datadog #{ex.message}")
       end
     end
 
@@ -178,6 +184,13 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   class DatadogHTTPClient < DatadogClient
     require "manticore"
+
+    RETRYABLE_EXCEPTIONS = [
+        ::Manticore::Timeout,
+        ::Manticore::SocketException,
+        ::Manticore::ClientProtocolException,
+        ::Manticore::ResolutionFailure
+    ]
 
     def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key)
       @logger = logger
@@ -194,13 +207,27 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     end
 
     def send(payload)
-      response = @client.post(@url, :body => payload, :headers => @headers).call
-      if response.code >= 500
-        raise RetryableError.new "Unable to send payload: #{response.code} #{response.body}"
+      begin
+        response = @client.post(@url, :body => payload, :headers => @headers).call
+        if response.code >= 500
+          raise RetryableError.new "Unable to send payload: #{response.code} #{response.body}"
+        end
+        if response.code >= 400
+          @logger.error("Unable to send payload due to client error: #{response.code} #{response.body}")
+        end
+      rescue => client_exception
+        should_retry = retryable_exception?(client_exception)
+        if should_retry
+          raise RetryableError.new "Unable to send payload #{client_exception.message}"
+        else
+          raise client_exception
+        end
       end
-      if response.code >= 400
-        @logger.error("Unable to send payload due to client error: #{response.code} #{response.body}")
-      end
+
+    end
+
+    def retryable_exception?(exception)
+      RETRYABLE_EXCEPTIONS.any? { |e| exception.is_a?(e) }
     end
 
     def close

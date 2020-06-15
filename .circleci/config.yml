@@ -15,7 +15,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Plugin
-          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v6:
     docker:
@@ -29,7 +29,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Plugin
-          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v7:
     docker:
@@ -43,7 +43,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Plugin
-          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
 workflows:
   version: 2.1

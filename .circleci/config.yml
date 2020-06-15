@@ -1,18 +1,12 @@
 version: 2.1
 
 jobs:
-  logstash_v5:
+  build:
     docker:
+      - image: alpine:3.7
       - image: docker.elastic.co/logstash/logstash:5.6.16
-    steps:
-      - checkout
-  logstash_v6:
-    docker:
       - image: docker.elastic.co/logstash/logstash:6.8.10
-    steps:
-      - checkout
-  logstash_v7:
-    docker:
       - image: docker.elastic.co/logstash/logstash:7.7.1
+
     steps:
-      - checkout
+      - run: sleep 5

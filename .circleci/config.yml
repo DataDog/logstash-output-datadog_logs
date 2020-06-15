@@ -12,12 +12,10 @@ jobs:
       - checkout
       - run:
           name: Build Gem
-          command: |
-            gem build logstash-output-datadog_logs.gemspec
-            cd /opt/logstash
+          command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Plugin
-          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: docker run --name logstash -d docker.elastic.co/logstash/logstash:5.6.16 sh -c "logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem"
 
   logstash_v6:
     docker:
@@ -28,12 +26,10 @@ jobs:
       - checkout
       - run:
           name: Build Gem
-          command: |
-            gem build logstash-output-datadog_logs.gemspec
-            cd /opt/logstash
+          command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Plugin
-          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: docker run --name logstash -d docker.elastic.co/logstash/logstash:6.8.10 sh -c "logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem"
 
   logstash_v7:
     docker:
@@ -44,12 +40,10 @@ jobs:
       - checkout
       - run:
           name: Build Gem
-          command: |
-            gem build logstash-output-datadog_logs.gemspec
-            cd /opt/logstash
+          command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Plugin
-          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: docker run --name logstash -d docker.elastic.co/logstash/logstash:7.7.1 sh -c "logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem"
 
 workflows:
   version: 2.1

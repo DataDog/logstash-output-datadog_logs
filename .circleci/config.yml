@@ -3,15 +3,55 @@ orbs:
   ruby: circleci/ruby@0.1.2
 
 jobs:
-  build:
+  logstash_v5:
     docker:
       - image: circleci/ruby:2.6.3-stretch-node
       - image: docker.elastic.co/logstash/logstash:5.6.16
-      - image: docker.elastic.co/logstash/logstash:6.8.10
-      - image: docker.elastic.co/logstash/logstash:7.7.1
     executor: ruby/default
+    docker_layer_caching: true
     steps:
       - checkout
       - run:
           name: Build Gem
           command: gem build logstash-output-datadog_logs.gemspec
+      - run:
+          name: Install Plugin
+          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+
+  logstash_v6:
+    docker:
+      - image: circleci/ruby:2.6.3-stretch-node
+      - image: docker.elastic.co/logstash/logstash:6.8.10
+    executor: ruby/default
+    docker_layer_caching: true
+    steps:
+      - checkout
+      - run:
+          name: Build Gem
+          command: gem build logstash-output-datadog_logs.gemspec
+      - run:
+          name: Install Plugin
+          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+
+  logstash_v7:
+    docker:
+      - image: circleci/ruby:2.6.3-stretch-node
+      - image: docker.elastic.co/logstash/logstash:7.7.1
+    executor: ruby/default
+    docker_layer_caching: true
+    steps:
+      - checkout
+      - run:
+          name: Build Gem
+          command: gem build logstash-output-datadog_logs.gemspec
+      - run:
+          name: Install Plugin
+          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+
+workflows:
+  version: 2.1
+  test_logstash:
+    jobs:
+      - logstash_v5
+      - logstash_v6
+      - logstash_v7

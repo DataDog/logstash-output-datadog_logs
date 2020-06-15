@@ -12,7 +12,9 @@ jobs:
       - checkout
       - run:
           name: Build Gem
-          command: gem build logstash-output-datadog_logs.gemspec
+          command: |
+          gem build logstash-output-datadog_logs.gemspec
+          cd /opt/logstash
       - run:
           name: Install Plugin
           command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
@@ -26,7 +28,9 @@ jobs:
       - checkout
       - run:
           name: Build Gem
-          command: gem build logstash-output-datadog_logs.gemspec
+          command: |
+          gem build logstash-output-datadog_logs.gemspec
+          cd /opt/logstash
       - run:
           name: Install Plugin
           command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
@@ -40,7 +44,9 @@ jobs:
       - checkout
       - run:
           name: Build Gem
-          command: gem build logstash-output-datadog_logs.gemspec
+          command: |
+          gem build logstash-output-datadog_logs.gemspec
+          cd /opt/logstash
       - run:
           name: Install Plugin
           command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem

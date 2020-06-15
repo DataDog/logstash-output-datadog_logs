@@ -1,14 +1,12 @@
 version: 2.1
-orbs:
-  ruby: circleci/ruby@0.1.2
-  gem: zfhui/ruby-gem@0.2.1
 
 jobs:
-  build:
+  logstash_v5:
     docker:
-      - image: circleci/ruby:2.6.3-stretch-node
-    executor: ruby/default
-    steps:
-      - gem/setup-and-test:
-          gemspec: logstash-output-datadog_logs.gemspec
-          bundler-version: 2.0.1
+      - image: docker.elastic.co/logstash/logstash:5.6.16
+  logstash_v6:
+    docker:
+      - image: docker.elastic.co/logstash/logstash:6.8.10
+  logstash_v7:
+    docker:
+      - image: docker.elastic.co/logstash/logstash:7.7.1

@@ -1,12 +1,17 @@
 version: 2.1
+orbs:
+  ruby: circleci/ruby@0.1.2
 
 jobs:
   build:
     docker:
-      - image: alpine:3.7
+      - image: circleci/ruby:2.6.3-stretch-node
       - image: docker.elastic.co/logstash/logstash:5.6.16
       - image: docker.elastic.co/logstash/logstash:6.8.10
       - image: docker.elastic.co/logstash/logstash:7.7.1
-
+    executor: ruby/default
     steps:
-      - run: sleep 5
+      - checkout
+      - run:
+          name: Build Gem
+          command: gem build logstash-output-datadog_logs.gemspec

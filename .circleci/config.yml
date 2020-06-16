@@ -26,9 +26,6 @@ jobs:
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
-      - run:
-          name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
 
   logstash_v6:
     machine: true
@@ -53,9 +50,6 @@ jobs:
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
-      - run:
-          name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
 
   logstash_v7:
     machine: true
@@ -80,9 +74,6 @@ jobs:
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
-      - run:
-          name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
 
 workflows:
   version: 2.1

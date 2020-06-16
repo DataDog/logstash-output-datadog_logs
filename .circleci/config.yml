@@ -23,7 +23,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-0.4.1.gem
+          command: /usr/share/logstash/bin/logstash-plugin install ./logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v6:
     machine: true
@@ -47,7 +47,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-0.4.1.gem
+          command: /usr/share/logstash/bin/logstash-plugin install ./logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v7:
     machine: true
@@ -71,7 +71,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-0.4.1.gem
+          command: /usr/share/logstash/bin/logstash-plugin install ./logstash-output-datadog_logs-0.4.1.gem
 
 workflows:
   version: 2.1

@@ -25,7 +25,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-0.4.1.gem
+          command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
 
   logstash_v6:
     machine: true
@@ -49,7 +49,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-0.4.1.gem
+          command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
 
   logstash_v7:
     machine: true
@@ -73,15 +73,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-0.4.1.gem
-
-  test:
-    docker:
-      - image: cimg/ruby:2.7-node # this is our primary docker image, where step commands run.
-    steps:
-      - checkout
-      - ruby/install-deps
-      - ruby/rspec-test
+          command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
 
 workflows:
   version: 2.1
@@ -90,4 +82,3 @@ workflows:
       - logstash_v5
       - logstash_v6
       - logstash_v7
-      - test

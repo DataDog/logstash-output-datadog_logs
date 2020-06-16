@@ -2,10 +2,12 @@ version: 2.1
 
 jobs:
   logstash_v5:
-    machine:
-      image: circleci/ruby:2.6.3-stretch-node
+    machine: true
     steps:
       - checkout
+      - run:
+          name: Install Ruby
+          command: sudo apt-get update && sudo apt-get install ruby-full
       - run:
           name: Build Gem
           command: gem build logstash-output-datadog_logs.gemspec
@@ -24,10 +26,12 @@ jobs:
           command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v6:
-    machine:
-      image: circleci/ruby:2.6.3-stretch-node
+    machine: true
     steps:
       - checkout
+      - run:
+          name: Install Ruby
+          command: sudo apt-get update && sudo apt-get install ruby-full
       - run:
           name: Build Gem
           command: gem build logstash-output-datadog_logs.gemspec
@@ -46,10 +50,12 @@ jobs:
           command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v7:
-    machine:
-      image: circleci/ruby:2.6.3-stretch-node
+    machine: true
     steps:
       - checkout
+      - run:
+          name: Install Ruby
+          command: sudo apt-get update && sudo apt-get install ruby-full
       - run:
           name: Build Gem
           command: gem build logstash-output-datadog_logs.gemspec

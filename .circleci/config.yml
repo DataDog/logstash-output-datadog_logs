@@ -1,10 +1,8 @@
 version: 2.1
-orbs:
-  ruby: circleci/ruby@0.1.2
 
 jobs:
   logstash_v5:
-    docker:
+    machine:
       - image: circleci/ruby:2.6.3-stretch-node
     executor: ruby/default
     steps:
@@ -27,7 +25,7 @@ jobs:
           command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v6:
-    docker:
+    machine:
       - image: circleci/ruby:2.6.3-stretch-node
     executor: ruby/default
     steps:
@@ -50,7 +48,7 @@ jobs:
           command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v7:
-    docker:
+    machine:
       - image: circleci/ruby:2.6.3-stretch-node
     executor: ruby/default
     steps:

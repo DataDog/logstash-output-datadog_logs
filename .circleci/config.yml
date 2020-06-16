@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   logstash_v5:
     machine:
-      - image: circleci/ruby:2.6.3-stretch-node
+      image: circleci/ruby:2.6.3-stretch-node
     executor: ruby/default
     steps:
       - checkout
@@ -26,7 +26,7 @@ jobs:
 
   logstash_v6:
     machine:
-      - image: circleci/ruby:2.6.3-stretch-node
+      image: circleci/ruby:2.6.3-stretch-node
     executor: ruby/default
     steps:
       - checkout
@@ -49,7 +49,7 @@ jobs:
 
   logstash_v7:
     machine:
-      - image: circleci/ruby:2.6.3-stretch-node
+      image: circleci/ruby:2.6.3-stretch-node
     executor: ruby/default
     steps:
       - checkout

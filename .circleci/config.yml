@@ -23,13 +23,12 @@ jobs:
             sudo apt-get install apt-transport-https
             echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
             sudo apt-get update && sudo apt-get install logstash
-            export API_KEY=${API_KEY}
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+          command: sudo -u root /usr/share/logstash/bin/logstash -r -f "test/test.conf"
 
   logstash_v6:
     machine: true
@@ -51,13 +50,12 @@ jobs:
             sudo apt-get install apt-transport-https
             echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
             sudo apt-get update && sudo apt-get install logstash
-            export API_KEY=${API_KEY}
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+          command: sudo -u root /usr/share/logstash/bin/logstash -r -f "test/test.conf"
 
   logstash_v7:
     machine: true
@@ -79,13 +77,12 @@ jobs:
             sudo apt-get install apt-transport-https
             echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
             sudo apt-get update && sudo apt-get install logstash
-            export API_KEY=${API_KEY}
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+          command: sudo -u root /usr/share/logstash/bin/logstash -r -f "test/test.conf"
 
 workflows:
   version: 2.1

@@ -14,7 +14,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Java
-          command: sudo apt-get install openjdk-8-jre
+          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
       - run:
           name: Install Logstash
           command: |
@@ -34,7 +34,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Java
-          command: sudo apt-get install openjdk-8-jre
+          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
       - run:
           name: Install Logstash
           command: |
@@ -54,7 +54,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Java
-          command: sudo apt-get install openjdk-8-jre
+          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
       - run:
           name: Install Logstash
           command: |

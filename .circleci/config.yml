@@ -24,7 +24,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v6:
     docker:
@@ -47,7 +47,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
   logstash_v7:
     docker:
@@ -70,7 +70,7 @@ jobs:
             sudo apt-get update && sudo apt-get install logstash
       - run:
           name: Install Plugin
-          command: bin/logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
+          command: logstash-plugin install --local logstash-output-datadog_logs-0.4.1.gem
 
 workflows:
   version: 2.1

@@ -75,6 +75,28 @@ jobs:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
 
+  test:
+    docker:
+      - image: circleci/jruby:latest
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gem-cache-{{ checksum "Gemfile.lock" }}
+      # avoids CVEs
+      - run: gem update --system
+      - run: gem install bundler
+      - run: bundle install --path vendor/bundle
+      - save_cache:
+            key: gem-cache-{{ checksum "Gemfile.lock" }}
+            paths:
+              - vendor/bundle
+      - run: bundle exec rspec
+      - run: bundle exec cucumber
+      - run: bundle exec bundle-audit check --update
+
+
 workflows:
   version: 2.1
   test_logstash:

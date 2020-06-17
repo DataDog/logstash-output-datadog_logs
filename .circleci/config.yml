@@ -104,3 +104,4 @@ workflows:
       - logstash_v5
       - logstash_v6
       - logstash_v7
+      - test

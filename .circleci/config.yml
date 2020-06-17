@@ -93,7 +93,6 @@ jobs:
             paths:
               - vendor/bundle
       - run: bundle exec rspec
-      - run: bundle exec cucumber
       - run: bundle exec bundle-audit check --update
 
 

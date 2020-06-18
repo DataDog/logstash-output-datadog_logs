@@ -28,7 +28,7 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Test Server
-          command: sudo go run test/server.go &
+          command: sudo go run test/server.go
       - run:
           name: Run Logstash
           command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
@@ -58,7 +58,7 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Test Server
-          command: sudo go run test/server.go &
+          command: sudo go run test/server.go
       - run:
           name: Run Logstash
           command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
@@ -88,7 +88,7 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Test Server
-          command: sudo go run test/server.go &
+          command: sudo go run test/server.go
       - run:
           name: Run Logstash
           command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"

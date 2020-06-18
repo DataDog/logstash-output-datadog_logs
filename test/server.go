@@ -17,7 +17,7 @@ func main() {
 }
 
 func writeLogs() {
-	f, err := os.OpenFile("test/test.log",
+	f, err := os.OpenFile("/home/circleci/project/test/test.log",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)

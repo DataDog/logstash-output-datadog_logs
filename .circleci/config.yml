@@ -30,9 +30,9 @@ jobs:
           name: Run Logstash
           command: |
             if [ sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf" == 137 ]; then
-              return 1
+              exit 1
             else
-              return 0
+              exit 0
             fi
 
   logstash_v6:
@@ -62,9 +62,9 @@ jobs:
           name: Run Logstash
           command: |
             if [ sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf" == 137 ]; then
-              return 1
+              exit 1
             else
-              return 0
+              exit 0
             fi
 
   logstash_v7:
@@ -94,9 +94,9 @@ jobs:
           name: Run Logstash
           command: |
             if [ sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf" == 137 ]; then
-              return 1
+              exit 1
             else
-              return 0
+              exit 0
             fi
 
   test:

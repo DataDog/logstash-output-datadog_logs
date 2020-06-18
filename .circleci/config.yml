@@ -41,7 +41,6 @@ jobs:
 
   logstash_v6:
     machine: true
-    <<: *install_deps
     steps:
       - checkout
       - run:
@@ -78,7 +77,6 @@ jobs:
 
   logstash_v7:
     machine: true
-    <<: *install_deps
     steps:
       - checkout
       - run:

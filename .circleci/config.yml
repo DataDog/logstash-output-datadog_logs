@@ -2,30 +2,26 @@ version: 2.1
 orbs:
   ruby: circleci/ruby@1.0
 
-install_deps: &install_deps
-  steps:
-    - checkout
-    - run:
-        name: Install Ruby
-        command: sudo apt-get update && sudo apt-get install ruby-full
-    - run:
-        name: Build Gem
-        command: gem build logstash-output-datadog_logs.gemspec
-    - run:
-        name: Install Java
-        command: sudo apt-get update && sudo apt-get install openjdk-8-jre
-    - run:
-        name: Install Go
-        command: |
-          sudo add-apt-repository ppa:longsleep/golang-backports
-          sudo apt update
-          sudo apt install golang-go
-
 jobs:
   logstash_v5:
     machine: true
-    <<: *install_deps
     steps:
+      - checkout
+      - run:
+          name: Install Ruby
+          command: sudo apt-get update && sudo apt-get install ruby-full
+      - run:
+          name: Build Gem
+          command: gem build logstash-output-datadog_logs.gemspec
+      - run:
+          name: Install Java
+          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
+      - run:
+          name: Install Go
+          command: |
+            sudo add-apt-repository ppa:longsleep/golang-backports
+            sudo apt update
+            sudo apt install golang-go
       - run:
           name: Install Logstash
           command: |
@@ -47,6 +43,22 @@ jobs:
     machine: true
     <<: *install_deps
     steps:
+      - checkout
+      - run:
+          name: Install Ruby
+          command: sudo apt-get update && sudo apt-get install ruby-full
+      - run:
+          name: Build Gem
+          command: gem build logstash-output-datadog_logs.gemspec
+      - run:
+          name: Install Java
+          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
+      - run:
+          name: Install Go
+          command: |
+            sudo add-apt-repository ppa:longsleep/golang-backports
+            sudo apt update
+            sudo apt install golang-go
       - run:
           name: Install Logstash
           command: |
@@ -68,6 +80,22 @@ jobs:
     machine: true
     <<: *install_deps
     steps:
+      - checkout
+      - run:
+          name: Install Ruby
+          command: sudo apt-get update && sudo apt-get install ruby-full
+      - run:
+          name: Build Gem
+          command: gem build logstash-output-datadog_logs.gemspec
+      - run:
+          name: Install Java
+          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
+      - run:
+          name: Install Go
+          command: |
+            sudo add-apt-repository ppa:longsleep/golang-backports
+            sudo apt update
+            sudo apt install golang-go
       - run:
           name: Install Logstash
           command: |

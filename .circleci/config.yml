@@ -28,7 +28,12 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+          command: |
+            if [ sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf" == 137 ]; then
+              return 1
+            else
+              return 0
+            fi
 
   logstash_v6:
     machine: true
@@ -55,7 +60,12 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+          command: |
+            if [ sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf" == 137 ]; then
+              return 1
+            else
+              return 0
+            fi
 
   logstash_v7:
     machine: true
@@ -82,7 +92,12 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
-          command: sudo /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+          command: |
+            if [ sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf" == 137 ]; then
+              return 1
+            else
+              return 0
+            fi
 
   test:
     docker:

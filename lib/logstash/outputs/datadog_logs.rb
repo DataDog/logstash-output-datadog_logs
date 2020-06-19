@@ -197,7 +197,6 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       protocol = use_ssl ? "https" : "http"
       @url = "#{protocol}://#{host}:#{port.to_s}/v1/input/#{api_key}"
       @headers = {"Content-Type" => "application/json"}
-      raise NotImplementedError, "Not implemented"
       if use_compression
         @headers["Content-Encoding"] = "gzip"
       end

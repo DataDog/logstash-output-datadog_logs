@@ -31,6 +31,7 @@ jobs:
           command: |
             sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             status=$?
+            echo $status
             if [ $status -eq 124 ]
             then
               exit 0

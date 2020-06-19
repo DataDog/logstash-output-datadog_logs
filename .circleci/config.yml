@@ -30,7 +30,7 @@ jobs:
           name: Run Logstash
           shell: /bin/sh
           command: |
-            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+            sudo timeout 30s /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             test "$?" -eq 124
 
   logstash_v6:
@@ -60,7 +60,7 @@ jobs:
           name: Run Logstash
           shell: /bin/sh
           command: |
-            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+            sudo timeout 30s /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             test "$?" -eq 124
 
   logstash_v7:
@@ -90,7 +90,7 @@ jobs:
           name: Run Logstash
           shell: /bin/sh
           command: |
-            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+            sudo timeout 30s /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             test "$?" -eq 124
 
   test:

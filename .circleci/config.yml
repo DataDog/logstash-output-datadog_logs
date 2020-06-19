@@ -29,7 +29,7 @@ jobs:
       - run:
           name: Run Logstash
           command: |
-            sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             exit 0
 
   logstash_v6:
@@ -58,7 +58,7 @@ jobs:
       - run:
           name: Run Logstash
           command: |
-            sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             exit 0
 
   logstash_v7:
@@ -87,7 +87,7 @@ jobs:
       - run:
           name: Run Logstash
           command: |
-            sudo timeout -s SIGKILL 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             exit 0
 
   test:

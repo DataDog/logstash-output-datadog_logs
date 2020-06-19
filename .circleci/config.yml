@@ -30,7 +30,7 @@ jobs:
           name: Run Logstash
           shell: /bin/sh
           command: |
-            set -o; sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             test "$?" -eq 124
 
   logstash_v6:

@@ -29,8 +29,7 @@ jobs:
       - run:
           name: Run Logstash
           command: |
-            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
-            exit 0
+            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"; echo 0
 
   logstash_v6:
     machine: true
@@ -58,8 +57,7 @@ jobs:
       - run:
           name: Run Logstash
           command: |
-            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
-            exit 0
+            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"; echo 0
 
   logstash_v7:
     machine: true
@@ -87,8 +85,7 @@ jobs:
       - run:
           name: Run Logstash
           command: |
-            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
-            exit 0
+            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"; echo 0
 
   test:
     docker:

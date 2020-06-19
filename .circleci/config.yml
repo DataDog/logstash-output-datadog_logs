@@ -58,14 +58,10 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
+          shell: /bin/sh
           command: |
             sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
-            status=$?
-            if [ $status -eq 124 ]
-            then
-              exit 0
-            fi
-            exit $status
+            test "$?" -eq 124
 
   logstash_v7:
     machine: true
@@ -92,14 +88,10 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
+          shell: /bin/sh
           command: |
             sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
-            status=$?
-            if [ $status -eq 124 ]
-            then
-              exit 0
-            fi
-            exit $status
+            test "$?" -eq 124
 
   test:
     docker:

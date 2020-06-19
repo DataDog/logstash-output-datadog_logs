@@ -30,7 +30,12 @@ jobs:
           name: Run Logstash
           command: |
             sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
-            test "$?" -eq 124
+            status=$?
+            if [ $status -eq 124 ]
+            then
+              exit 0
+            fi
+            exit $status
 
   logstash_v6:
     machine: true
@@ -59,7 +64,12 @@ jobs:
           name: Run Logstash
           command: |
             sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
-            test "$?" -eq 124
+            status=$?
+            if [ $status -eq 124 ]
+            then
+              exit 0
+            fi
+            exit $status
 
   logstash_v7:
     machine: true
@@ -88,7 +98,12 @@ jobs:
           name: Run Logstash
           command: |
             sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
-            test "$?" -eq 124
+            status=$?
+            if [ $status -eq 124 ]
+            then
+              exit 0
+            fi
+            exit $status
 
   test:
     docker:

@@ -28,8 +28,10 @@ jobs:
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-${VERSION}.gem
       - run:
           name: Run Logstash
+          command: sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
+      - run:
+          name: Test Logstash output
           command: |
-            sudo timeout 1m /usr/share/logstash/bin/logstash -r -f "test/test.conf"
             status=$?
             echo $status
             if [ $status -eq 124 ]

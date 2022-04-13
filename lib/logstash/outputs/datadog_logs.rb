@@ -196,7 +196,6 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
     def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes)
       @logger = logger
-      @force_v1_routes = force_v1_routes
       protocol = use_ssl ? "https" : "http"
 
       @headers = {"Content-Type" => "application/json"}
@@ -224,7 +223,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       begin
         response = @client.post(@url, :body => payload, :headers => @headers).call
         # in case of error or 429 when using v2 endpoints, we will retry sending this payload
-        if response.code >= 500 || (response.code == 429 && not @force_v1_routes)
+        if response.code >= 500 || response.code == 429
           raise RetryableError.new "Unable to send payload: #{response.code} #{response.body}"
         end
         if response.code >= 400

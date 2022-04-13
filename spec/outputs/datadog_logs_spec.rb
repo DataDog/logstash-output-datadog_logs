@@ -107,13 +107,12 @@ describe LogStash::Outputs::DatadogLogs do
           expect { client.send(payload) }.to_not raise_error
         end
 
-        it "should retry when server is returning 429 but only when using v2 routes" do
+        it "should retry when server is returning 429" do
           api_key = 'XXX'
           stub_dd_request_with_return_code(api_key, 429)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
-          expect { client.send(payload) }.to_not raise_error if force_v1_routes
-          expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError) if not force_v1_routes
+          expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
         end
 
         it "should retry when facing a timeout exception from manticore" do

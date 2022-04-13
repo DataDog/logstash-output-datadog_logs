@@ -27,6 +27,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'manticore', '>= 0.5.2', '< 1.0.0'
   s.add_runtime_dependency 'logstash-codec-json'
 
-  s.add_development_dependency 'logstash-devutils'
+  s.add_development_dependency 'logstash-devutils', "= 1.3.6"
   s.add_development_dependency 'webmock'
 end

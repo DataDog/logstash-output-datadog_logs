@@ -222,6 +222,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     def send(payload)
       begin
         response = @client.post(@url, :body => payload, :headers => @headers).call
+        # in case of error or 429, we will retry sending this payload
         if response.code >= 500 || response.code == 429
           raise RetryableError.new "Unable to send payload: #{response.code} #{response.body}"
         end

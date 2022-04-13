@@ -8,6 +8,7 @@ require "logstash/outputs/base"
 require "logstash/namespace"
 require "zlib"
 
+require_relative "version"
 
 # DatadogLogs lets you send logs to Datadog
 # based on LogStash events.
@@ -33,11 +34,12 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   config :use_compression, :validate => :boolean, :required => false, :default => true
   config :compression_level, :validate => :number, :required => false, :default => 6
   config :no_ssl_validation, :validate => :boolean, :required => false, :default => false
+  config :force_v1_routes, :validate => :boolean, :required => false, :default => false # force using deprecated v1 routes
 
   # Register the plugin to logstash
   public
   def register
-    @client = new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression)
+    @client = new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression, @force_v1_routes)
   end
 
   # Logstash shutdown hook
@@ -143,9 +145,9 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   end
 
   # Build a new transport client
-  def new_client(logger, api_key, use_http, use_ssl, no_ssl_validation, host, port, use_compression)
+  def new_client(logger, api_key, use_http, use_ssl, no_ssl_validation, host, port, use_compression, force_v1_routes)
     if use_http
-      DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key
+      DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes
     else
       DatadogTCPClient.new logger, use_ssl, no_ssl_validation, host, port
     end
@@ -192,15 +194,26 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         ::Manticore::ResolutionFailure
     ]
 
-    def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key)
+    def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes)
       @logger = logger
       protocol = use_ssl ? "https" : "http"
-      @url = "#{protocol}://#{host}:#{port.to_s}/v1/input/#{api_key}"
+
       @headers = {"Content-Type" => "application/json"}
       if use_compression
         @headers["Content-Encoding"] = "gzip"
       end
-      logger.info("Starting HTTP connection to #{protocol}://#{host}:#{port.to_s} with compression " + (use_compression ? "enabled" : "disabled"))
+
+      if force_v1_routes
+        @url = "#{protocol}://#{host}:#{port.to_s}/v1/input/#{api_key}"
+      else
+        @url = "#{protocol}://#{host}:#{port.to_s}/api/v2/logs"
+        @headers["DD-API-KEY"] = api_key
+        @headers["DD-EVP-ORIGIN"] = "logstash"
+        @headers["DD-EVP-ORIGIN-VERSION"] = DatadogLogStashPlugin::VERSION
+      end
+
+      logger.info("Starting HTTP connection to #{protocol}://#{host}:#{port.to_s} with compression " + (use_compression ? "enabled" : "disabled") + (force_v1_routes ? " using v1 routes" : " using v2 routes"))
+
       config = {}
       config[:ssl][:verify] = :disable if no_ssl_validation
       @client = Manticore::Client.new(config)
@@ -209,7 +222,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     def send(payload)
       begin
         response = @client.post(@url, :body => payload, :headers => @headers).call
-        if response.code >= 500
+        if response.code >= 500 || response.code == 429
           raise RetryableError.new "Unable to send payload: #{response.code} #{response.body}"
         end
         if response.code >= 400

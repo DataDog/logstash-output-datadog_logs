@@ -95,7 +95,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/jruby:2.6.0
+      - image: circleci/jruby:latest
 
     steps:
       - checkout

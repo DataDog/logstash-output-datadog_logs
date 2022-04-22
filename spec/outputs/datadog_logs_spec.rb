@@ -199,23 +199,24 @@ describe LogStash::Outputs::DatadogLogs do
 
   def stub_dd_request(api_key, force_v1_routes)
     if force_v1_routes
-        stub_request(:post, "http://datadog.com/v1/input/#{api_key}").
-            with(
-                body: "{}",
-                headers: {
-                    'Connection' => 'Keep-Alive',
-                    'Content-Type' => 'application/json'
-                })
+      stub_request(:post, "http://datadog.com/v1/input/#{api_key}").
+        with(
+          body: "{}",
+          headers: {
+            'Connection' => 'Keep-Alive',
+            'Content-Type' => 'application/json'
+        })
     else
-        stub_request(:post, "http://datadog.com/api/v2/logs").
-            with(
-                body: "{}",
-                headers: {
-                    'Connection' => 'Keep-Alive',
-                    'Content-Type' => 'application/json',
-                    'DD-API-KEY' => "#{api_key}",
-                    'DD-EVP-ORIGIN' => 'logstash',
-                    'DD-EVP-ORIGIN-VERSION' => DatadogLogStashPlugin::VERSION
-                })
+      stub_request(:post, "http://datadog.com/api/v2/logs").
+        with(
+          body: "{}",
+          headers: {
+            'Connection' => 'Keep-Alive',
+            'Content-Type' => 'application/json',
+            'DD-API-KEY' => "#{api_key}",
+            'DD-EVP-ORIGIN' => 'logstash',
+            'DD-EVP-ORIGIN-VERSION' => DatadogLogStashPlugin::VERSION
+       })
     end
+  end
 end

@@ -90,10 +90,10 @@ describe LogStash::Outputs::DatadogLogs do
   end
 
   context "when facing HTTP connection issues" do
-    ['true', 'false'].each do |force_v1_routes|
-        it "should retry when server is returning 5XX" do
+    [true, false].each do |force_v1_routes|
+        it "should retry when server is returning 5XX " + (force_v1_routes ? "using v1 routes" : "using v2 routes") do
           api_key = 'XXX'
-          stub_dd_request_with_return_code(api_key, 500)
+          stub_dd_request_with_return_code(api_key, 500, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
@@ -101,7 +101,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should not retry when server is returning 4XX" do
           api_key = 'XXX'
-          stub_dd_request_with_return_code(api_key, 400)
+          stub_dd_request_with_return_code(api_key, 400, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to_not raise_error
@@ -109,7 +109,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should retry when server is returning 429" do
           api_key = 'XXX'
-          stub_dd_request_with_return_code(api_key, 429)
+          stub_dd_request_with_return_code(api_key, 429, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
@@ -117,7 +117,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should retry when facing a timeout exception from manticore" do
           api_key = 'XXX'
-          stub_dd_request_with_error(api_key, Manticore::Timeout)
+          stub_dd_request_with_error(api_key, Manticore::Timeout, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
@@ -125,7 +125,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should retry when facing a socket exception from manticore" do
           api_key = 'XXX'
-          stub_dd_request_with_error(api_key, Manticore::SocketException)
+          stub_dd_request_with_error(api_key, Manticore::SocketException, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
@@ -133,7 +133,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should retry when facing a client protocol exception from manticore" do
           api_key = 'XXX'
-          stub_dd_request_with_error(api_key, Manticore::ClientProtocolException)
+          stub_dd_request_with_error(api_key, Manticore::ClientProtocolException, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
@@ -141,7 +141,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should retry when facing a dns failure from manticore" do
           api_key = 'XXX'
-          stub_dd_request_with_error(api_key, Manticore::ResolutionFailure)
+          stub_dd_request_with_error(api_key, Manticore::ResolutionFailure, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
@@ -149,7 +149,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should retry when facing a socket timeout from manticore" do
           api_key = 'XXX'
-          stub_dd_request_with_error(api_key, Manticore::SocketTimeout)
+          stub_dd_request_with_error(api_key, Manticore::SocketTimeout, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
@@ -157,7 +157,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should not retry when facing any other general error" do
           api_key = 'XXX'
-          stub_dd_request_with_error(api_key, StandardError)
+          stub_dd_request_with_error(api_key, StandardError, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send(payload) }.to raise_error(StandardError)
@@ -165,7 +165,7 @@ describe LogStash::Outputs::DatadogLogs do
 
         it "should not stop the forwarder when facing any client uncaught exception" do
           api_key = 'XXX'
-          stub_dd_request_with_error(api_key, StandardError)
+          stub_dd_request_with_error(api_key, StandardError, force_v1_routes)
           payload = '{}'
           client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
           expect { client.send_retries(payload, 2, 2) }.to_not raise_error
@@ -187,24 +187,36 @@ describe LogStash::Outputs::DatadogLogs do
     end
   end
 
-  def stub_dd_request_with_return_code(api_key, return_code)
-    stub_dd_request(api_key).
+  def stub_dd_request_with_return_code(api_key, return_code, force_v1_routes)
+    stub_dd_request(api_key, force_v1_routes).
         to_return(status: return_code, body: "", headers: {})
   end
 
-  def stub_dd_request_with_error(api_key, error)
-    stub_dd_request(api_key).
+  def stub_dd_request_with_error(api_key, error, force_v1_routes)
+    stub_dd_request(api_key, force_v1_routes).
         to_raise(error)
   end
 
-  def stub_dd_request(api_key)
-    stub_request(:post, "http://datadog.com/v1/input/#{api_key}").
+  def stub_dd_request(api_key, force_v1_routes)
+    if force_v1_routes
+      stub_request(:post, "http://datadog.com/v1/input/#{api_key}").
         with(
-            body: "{}",
-            headers: {
-                'Connection' => 'Keep-Alive',
-                'Content-Type' => 'application/json'
-            })
+          body: "{}",
+          headers: {
+            'Connection' => 'Keep-Alive',
+            'Content-Type' => 'application/json'
+        })
+    else
+      stub_request(:post, "http://datadog.com/api/v2/logs").
+        with(
+          body: "{}",
+          headers: {
+            'Connection' => 'Keep-Alive',
+            'Content-Type' => 'application/json',
+            'DD-API-KEY' => "#{api_key}",
+            'DD-EVP-ORIGIN' => 'logstash',
+            'DD-EVP-ORIGIN-VERSION' => DatadogLogStashPlugin::VERSION
+       })
+    end
   end
-
 end

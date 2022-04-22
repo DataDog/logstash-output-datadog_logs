@@ -213,7 +213,7 @@ describe LogStash::Outputs::DatadogLogs do
                 body: "{}",
                 headers: {
                     'Connection' => 'Keep-Alive',
-                    'Content-Type' => 'application/json'
+                    'Content-Type' => 'application/json',
                     'DD-API-KEY' => api_key,
                     'DD-EVP-ORIGIN' = 'logstash',
                     'DD-EVP-ORIGIN-VERSION' = DatadogLogStashPlugin::VERSION

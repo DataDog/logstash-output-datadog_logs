@@ -206,7 +206,6 @@ describe LogStash::Outputs::DatadogLogs do
                     'Connection' => 'Keep-Alive',
                     'Content-Type' => 'application/json'
                 })
-        end
     else
         stub_request(:post, "http://datadog.com/api/v2/logs").
             with(
@@ -218,7 +217,5 @@ describe LogStash::Outputs::DatadogLogs do
                     'DD-EVP-ORIGIN' => 'logstash',
                     'DD-EVP-ORIGIN-VERSION' => DatadogLogStashPlugin::VERSION
                 })
-        end
     end
-
 end

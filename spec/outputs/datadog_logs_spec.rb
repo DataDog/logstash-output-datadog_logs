@@ -91,7 +91,7 @@ describe LogStash::Outputs::DatadogLogs do
 
   context "when facing HTTP connection issues" do
     ['true', 'false'].each do |force_v1_routes|
-        it "should retry when server is returning 5XX" do
+        it "should retry when server is returning 5XX " + (force_v1_routes ? "using v1 routes" : "using v2 routes") do
           api_key = 'XXX'
           stub_dd_request_with_return_code(api_key, 500)
           payload = '{}'

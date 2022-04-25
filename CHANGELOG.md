@@ -1,5 +1,8 @@
+## 0.5.0
+  - Support Datadog v2 endpoints #28
+
 ## 0.4.1
-  - Fix HTTP bug when remote server is timing out 
+  - Fix HTTP bug when remote server is timing out
 
 ## 0.4.0
   - Enable HTTP forwarding for logs

@@ -1,6 +1,12 @@
+# Load version.rb containing the DatadogLogStashPlugin::VERSION
+# for current Gem version.
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require "logstash/outputs/version.rb"
+
 Gem::Specification.new do |s|
   s.name          = 'logstash-output-datadog_logs'
-  s.version       = '0.4.1'
+  s.version       = DatadogLogStashPlugin::VERSION
   s.licenses      = ['Apache-2.0']
   s.summary       = 'DatadogLogs lets you send logs to Datadog based on LogStash events.'
   s.homepage      = 'https://www.datadoghq.com/'
@@ -21,6 +27,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'manticore', '>= 0.5.2', '< 1.0.0'
   s.add_runtime_dependency 'logstash-codec-json'
 
-  s.add_development_dependency 'logstash-devutils'
+  s.add_development_dependency 'logstash-devutils', "= 1.3.6"
   s.add_development_dependency 'webmock'
 end

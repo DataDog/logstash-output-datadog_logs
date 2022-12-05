@@ -19,8 +19,16 @@ Gem::Specification.new do |s|
   # Tests
   s.test_files = s.files.grep(%r{^(test|spec|features)/})
 
-  # Special flag to let us know this is actually a logstash plugin
-  s.metadata = {"logstash_plugin" => "true", "logstash_group" => "output"}
+  s.metadata = {
+    'bug_tracker_uri'   => 'https://github.com/DataDog/logstash-output-datadog_logs/issues',
+    'changelog_uri'     => 'https://github.com/DataDog/logstash-output-datadog_logs/blob/master/CHANGELOG.md',
+    'documentation_uri' => 'https://github.com/DataDog/logstash-output-datadog_logs/blob/master/README.md',
+    'source_code_uri'   => 'https://github.com/DataDog/logstash-output-datadog_logs',
+
+    # Special flag to let us know this is actually a logstash plugin
+    "logstash_plugin" => "true",
+    "logstash_group" => "output",
+  }
 
   # Gem dependencies
   s.add_runtime_dependency "logstash-core-plugin-api", "~> 2.0"

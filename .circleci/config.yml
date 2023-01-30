@@ -95,7 +95,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/jruby:9.2.11.1-jre8-node-browsers
+      - image: circleci/jruby:9.3-jre8-browsers
 
     steps:
       - checkout

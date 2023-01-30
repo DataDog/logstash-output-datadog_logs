@@ -1,0 +1,98 @@
+---
+
+name: Build and Test logstash-output-datadog_logs plugin
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    env:
+      LOGSTASH_SOURCE: 1
+      LOGSTASH_PATH: /usr/share/logstash
+      # LOGSTASH_PATH: ${{ github.workspace }}/logstash
+    steps:
+      - name: Checkout logstash-output-datadog_logs
+        uses: actions/checkout@v3
+
+      - name: Install Logstash GPG-KEY
+        run: curl -sS https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/elasticsearch.gpg
+
+      - name: Setup Logstash 8.x repo
+        run: echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list
+
+      - name: Install Logstash
+        run: sudo apt-get update && sudo apt-get install logstash
+
+      - name: Setup Ruby
+        run: |
+          echo "/usr/share/logstash/vendor/jruby/bin" >> $GITHUB_PATH
+          echo "/usr/share/logstash/jdk/bin" >> $GITHUB_PATH
+
+      - name: Run tests
+        run: |
+          sudo find /usr/share/logstash/vendor -type d -user root -exec sudo chown -R $USER: {} +
+          gem install bundler
+          bundle install --with test ci
+          bundle exec rake vendor
+          bundle exec rspec
+
+  test-logstash-tests:
+    name: Test logstash
+    strategy:
+      matrix:
+        logstash:
+          - 5.6.16
+          - 6.8.23
+          - 7.17.8
+          - 8.6.1
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v3
+
+      - name: Build Gem
+        run: gem build logstash-output-datadog_logs.gemspec
+
+      - name: Install Logstash GPG-KEY
+        run: curl -sS https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/elasticsearch.gpg
+
+      - name: Setup Logstash 5.x Java version to JDK 8
+        if: ${{ startsWith(matrix.logstash, '5') }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - name: Setup Logstash 5.x repo
+        if: ${{ startsWith(matrix.logstash, '5') }}
+        run: echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
+
+      - name: Setup Logstash 6.x repo
+        if: ${{ startsWith(matrix.logstash, '6') }}
+        run: echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
+
+      - name: Setup Logstash 7.x repo
+        if: ${{ startsWith(matrix.logstash, '7') }}
+        run: echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+
+      - name: Setup Logstash 8.x repo
+        if: ${{ startsWith(matrix.logstash, '8') }}
+        run: echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list
+
+      - name: Install Logstash
+        run: sudo apt-get update && sudo apt-get install logstash=1:${{ matrix.logstash }}-1
+
+      - name: Install Plugin
+        run: sudo -E /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-$(cat lib/logstash/outputs/version.rb| grep VERSION| cut -d"'" -f2).gem
+
+      - name: Run Logstash
+        run: |
+            sudo -E timeout 30s /usr/share/logstash/bin/logstash -r -f "test/test.conf" || test "$?" -eq 124

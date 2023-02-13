@@ -216,8 +216,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       logger.info("Starting HTTP connection to #{protocol}://#{host}:#{port.to_s} with compression " + (use_compression ? "enabled" : "disabled") + (force_v1_routes ? " using v1 routes" : " using v2 routes"))
 
       config = {}
-      config[:ssl] = {}
-      config[:verify] = :disable if no_ssl_validation
+      config[:ssl][:verify] = :disable if no_ssl_validation
       if http_proxy != ""
         config[:proxy] = http_proxy
       end

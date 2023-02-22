@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   # Files
-  s.files = Dir['lib/**/*', 'spec/**/*', 'vendor/**/*', '*.gemspec', '*.md', 'CONTRIBUTORS', 'Gemfile', 'LICENSE', 'NOTICE.TXT']
+  s.files = Dir['lib/**/*', 'spec/**/*', 'vendor/**/*', "vendor/jar-dependencies/**/*.jar", "vendor/jar-dependencies/**/*.rb", '*.gemspec', '*.md', 'CONTRIBUTORS', 'Gemfile', 'LICENSE', 'NOTICE.TXT']
   # Tests
   s.test_files = s.files.grep(%r{^(test|spec|features)/})
 
@@ -23,10 +23,10 @@ Gem::Specification.new do |s|
   s.metadata = {"logstash_plugin" => "true", "logstash_group" => "output"}
 
   # Gem dependencies
-  s.add_runtime_dependency "logstash-core-plugin-api", "~> 2.0"
+  s.add_runtime_dependency "logstash-core-plugin-api", ">= 1.60", "<= 2.99"
   s.add_runtime_dependency 'manticore', '>= 0.5.2', '< 1.0.0'
   s.add_runtime_dependency 'logstash-codec-json'
 
-  s.add_development_dependency 'logstash-devutils', "= 1.3.6"
+  s.add_development_dependency 'logstash-devutils'
   s.add_development_dependency 'webmock'
 end

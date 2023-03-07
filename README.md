@@ -58,8 +58,8 @@ output {
 |  Property   |  Description                                                             |  Default value |
 |-------------|--------------------------------------------------------------------------|----------------|
 | **api_key** | The API key of your Datadog platform | nil |
-| **host** | Proxy endpoint when logs are not directly forwarded to Datadog | intake.logs.datadoghq.com |
-| **port** | Proxy port when logs are not directly forwarded to Datadog | 443 |
+| **host** | Endpoint when logs are not directly forwarded to Datadog | intake.logs.datadoghq.com |
+| **port** | Port when logs are not directly forwarded to Datadog | 443 |
 | **use_ssl** | If true, the agent initializes a secure connection to Datadog. Ensure to update the port if you disable it. | true |
 | **max_retries** | The number of retries before the output plugin stops | 5 |
 | **max_backoff** | The maximum time waited between each retry in seconds | 30 |
@@ -67,6 +67,7 @@ output {
 | **use_compression** | Enable log compression for HTTP | true |
 | **compression_level** | Set the log compression level for HTTP (1 to 9, 9 being the best ratio) | 6 |
 | **no_ssl_validation** | Disable SSL validation (useful for proxy forwarding) | false |
+| **http_proxy** | Proxy address for http proxies | none |
 
 
 

@@ -19,10 +19,19 @@ jobs:
       - run:
           name: Install Logstash
           command: |
+            export LS_JAVA_OPTS="-XX:-UseConcMarkSweepGC -XX:-UseParNewGC -XX:+UseG1GC"
             wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
             sudo apt-get install apt-transport-https
             echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
-            sudo apt-get update && sudo apt-get install logstash
+            sudo apt-get update
+            sudo apt-get download logstash
+            sudo dpkg --unpack logstash*.deb
+            sudo sed -i 's/UseParNewGC/UseG1GC/g' /etc/logstash/jvm.options.dpkg-new
+            sudo sed -i 's/UseConcMarkSweepGC/UseG1GC/g' /etc/logstash/jvm.options.dpkg-new
+            sudo sed -i 's/-XX:CMSInitiatingOccupancyFraction=75//g' /etc/logstash/jvm.options.dpkg-new
+            sudo sed -i 's/-XX:+UseCMSInitiatingOccupancyOnly//g' /etc/logstash/jvm.options.dpkg-new
+            sudo dpkg --configure logstash
+            sudo apt-get install -yf
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-$(cat lib/logstash/outputs/version.rb| grep VERSION| cut -d"'" -f2).gem
@@ -49,10 +58,11 @@ jobs:
       - run:
           name: Install Logstash
           command: |
+            export LS_JAVA_OPTS="-XX:-UseConcMarkSweepGC -XX:-UseParNewGC -XX:+UseG1GC"
             wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
             sudo apt-get install apt-transport-https
             echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
-            sudo apt-get update && sudo apt-get install logstash
+            sudo apt-get update && sudo env LS_JAVA_OPTS="-XX:-UseConcMarkSweepGC -XX:-UseParNewGC -XX:+UseG1GC" apt-get install logstash
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-$(cat lib/logstash/outputs/version.rb| grep VERSION| cut -d"'" -f2).gem
@@ -79,10 +89,11 @@ jobs:
       - run:
           name: Install Logstash
           command: |
+            export LS_JAVA_OPTS="-XX:-UseConcMarkSweepGC -XX:-UseParNewGC -XX:+UseG1GC"
             wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
             sudo apt-get install apt-transport-https
             echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
-            sudo apt-get update && sudo apt-get install logstash
+            sudo apt-get update && sudo env LS_JAVA_OPTS="-XX:-UseConcMarkSweepGC -XX:-UseParNewGC -XX:+UseG1GC" apt-get install logstash
       - run:
           name: Install Plugin
           command: sudo /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-$(cat lib/logstash/outputs/version.rb| grep VERSION| cut -d"'" -f2).gem

@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  ruby: circleci/ruby@1.0
+  ruby: circleci/ruby@2.0
 
 jobs:
   logstash_v5:
@@ -15,7 +15,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Java
-          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
+          command: sudo apt-get update && sudo apt-get install openjdk-11-jre
       - run:
           name: Install Logstash
           command: |
@@ -45,7 +45,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Java
-          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
+          command: sudo apt-get update && sudo apt-get install openjdk-11-jre
       - run:
           name: Install Logstash
           command: |
@@ -75,7 +75,7 @@ jobs:
           command: gem build logstash-output-datadog_logs.gemspec
       - run:
           name: Install Java
-          command: sudo apt-get update && sudo apt-get install openjdk-8-jre
+          command: sudo apt-get update && sudo apt-get install openjdk-11-jre
       - run:
           name: Install Logstash
           command: |
@@ -95,7 +95,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/jruby:9.3-jre8-browsers
+      - image: circleci/jruby:9.3-jre11-browsers
 
     steps:
       - checkout

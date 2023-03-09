@@ -90,12 +90,13 @@ describe LogStash::Outputs::DatadogLogs do
   end
 
   context "when facing HTTP connection issues" do
+    http_proxy = ""
     [true, false].each do |force_v1_routes|
         it "should retry when server is returning 5XX " + (force_v1_routes ? "using v1 routes" : "using v2 routes") do
           api_key = 'XXX'
           stub_dd_request_with_return_code(api_key, 500, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
         end
 
@@ -103,7 +104,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_return_code(api_key, 400, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to_not raise_error
         end
 
@@ -111,7 +112,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_return_code(api_key, 429, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
         end
 
@@ -119,7 +120,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_error(api_key, Manticore::Timeout, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
         end
 
@@ -127,7 +128,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_error(api_key, Manticore::SocketException, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
         end
 
@@ -135,7 +136,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_error(api_key, Manticore::ClientProtocolException, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
         end
 
@@ -143,7 +144,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_error(api_key, Manticore::ResolutionFailure, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
         end
 
@@ -151,7 +152,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_error(api_key, Manticore::SocketTimeout, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to raise_error(LogStash::Outputs::DatadogLogs::RetryableError)
         end
 
@@ -159,7 +160,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_error(api_key, StandardError, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send(payload) }.to raise_error(StandardError)
         end
 
@@ -167,7 +168,7 @@ describe LogStash::Outputs::DatadogLogs do
           api_key = 'XXX'
           stub_dd_request_with_error(api_key, StandardError, force_v1_routes)
           payload = '{}'
-          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes
+          client = LogStash::Outputs::DatadogLogs::DatadogHTTPClient.new Logger.new(STDOUT), false, false, "datadog.com", 80, false, api_key, force_v1_routes, http_proxy
           expect { client.send_retries(payload, 2, 2) }.to_not raise_error
         end
     end

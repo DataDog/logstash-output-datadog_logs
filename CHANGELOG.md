@@ -1,3 +1,6 @@
+## 0.5.1
+  - Support using HTTP proxies, adding the `http_proxy` parameter.
+
 ## 0.5.0
   - Support Datadog v2 endpoints #28
 

@@ -93,6 +93,21 @@ jobs:
       - name: Install Plugin
         run: sudo -E /usr/share/logstash/bin/logstash-plugin install logstash-output-datadog_logs-$(cat lib/logstash/outputs/version.rb| grep VERSION| cut -d"'" -f2).gem
 
+      - name: Plugin configuration
+        run: |
+          echo ''                                  > /tmp/logfile.log
+          echo 'input {'                           > /tmp/test.conf
+          echo '  file {'                         >> /tmp/test.conf
+          echo '    path => ["/tmp/logfile.log"]' >> /tmp/test.conf
+          echo '  }'                              >> /tmp/test.conf
+          echo '}'                                >> /tmp/test.conf
+          echo 'output {'                         >> /tmp/test.conf
+          echo '  datadog_logs {'                 >> /tmp/test.conf
+          echo '    api_key => "XXX"'             >> /tmp/test.conf
+          echo '  }'                              >> /tmp/test.conf
+          echo '}'                                >> /tmp/test.conf
+
       - name: Run Logstash
         run: |
-            sudo -E timeout 30s /usr/share/logstash/bin/logstash -r -f "test/test.conf" || test "$?" -eq 124
+            sleep 20 && echo 'this is a log' >> /tmp/logfile.log&
+            sudo -E timeout 30s /usr/share/logstash/bin/logstash -r -f "/tmp/test.conf" || test "$?" -eq 124

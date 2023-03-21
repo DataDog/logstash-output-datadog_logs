@@ -5,7 +5,7 @@ DatadogLogs lets you send logs to Datadog based on LogStash events.
 
 ## Requirements
 
-The plugin relies upon the `zlib` library for compressing data.
+The plugin relies upon the `zlib` library for compressing data. Successfully tested with Logstash 6.x, 7.x and 8.x.
 
 ## How to install it?
 

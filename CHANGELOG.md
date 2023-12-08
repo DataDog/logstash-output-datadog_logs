@@ -1,3 +1,6 @@
+## 0.5.2
+  - Now checks if logstash is being shutdown
+
 ## 0.5.1
   - Support using HTTP proxies, adding the `http_proxy` parameter.
 

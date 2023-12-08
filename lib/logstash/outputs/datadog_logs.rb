@@ -157,6 +157,9 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   class RetryableError < StandardError;
   end
 
+  class InterruptedError < StandardError;
+  end
+
   class DatadogClient
     def send_retries(payload, max_retries, max_backoff)
       backoff = 1
@@ -166,15 +169,34 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       rescue RetryableError => e
         if retries < max_retries || max_retries < 0
           @logger.warn("Retrying send due to: #{e.message}")
-          sleep backoff
+          interruptableSleep(backoff)
           backoff = 2 * backoff unless backoff > max_backoff
           retries += 1
           retry
         end
         @logger.error("Max number of retries reached, dropping message. Last exception: #{ex.message}")
       rescue => ex
-        @logger.error("Unmanaged exception while sending log to datadog #{ex.message}")
+        if ex.is_a?(InterruptedError)
+          raise ex
+        else
+          @logger.error("Unmanaged exception while sending log to datadog #{ex.message}")
+        end
       end
+    end
+
+    def interruptableSleep(duration)
+      amountSlept = 0
+      while amountSlept < duration
+        sleep 1
+        amountSlept += 1
+        if interrupted?
+          raise InterruptedError.new "Interrupted while backing off"
+        end
+      end
+    end
+
+    def interrupted?
+      false
     end
 
     def send(payload)

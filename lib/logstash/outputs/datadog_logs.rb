@@ -65,7 +65,11 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         end
       end
     rescue => e
-      @logger.error("Uncaught processing exception in datadog forwarder #{e.message}")
+      if e.is_a?(InterruptedError)
+        raise e
+      else
+        @logger.error("Uncaught processing exception in datadog forwarder #{e.message}")
+      end
     end
   end
 
@@ -148,7 +152,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   # Build a new transport client
   def new_client(logger, api_key, use_http, use_ssl, no_ssl_validation, host, port, use_compression, force_v1_routes, http_proxy)
     if use_http
-      DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes, http_proxy
+      DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes, http_proxy, -> { defined?(pipeline_shutdown_requested?) ? pipeline_shutdown_requested? : false }
     else
       DatadogTCPClient.new logger, use_ssl, no_ssl_validation, host, port
     end

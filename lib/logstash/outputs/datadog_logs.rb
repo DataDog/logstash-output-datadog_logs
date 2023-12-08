@@ -218,7 +218,8 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         ::Manticore::ResolutionFailure
     ]
 
-    def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes, http_proxy)
+    def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes, http_proxy, interruptedLambda = nil)
+      @interruptedLambda = interruptedLambda
       @logger = logger
       protocol = use_ssl ? "https" : "http"
 
@@ -244,6 +245,14 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         config[:proxy] = http_proxy
       end
       @client = Manticore::Client.new(config)
+    end
+
+    def interrupted?
+      if @interruptedLambda
+        return @interruptedLambda.call
+      end
+
+      false
     end
 
     def send(payload)

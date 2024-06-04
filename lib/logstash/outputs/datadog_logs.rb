@@ -178,7 +178,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
           retries += 1
           retry
         end
-        @logger.error("Max number of retries reached, dropping message. Last exception: #{ex.message}")
+        @logger.error("Max number of retries reached, dropping message. Last exception: #{e.message}")
       rescue => ex
         if ex.is_a?(InterruptedError)
           raise ex

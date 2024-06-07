@@ -65,7 +65,11 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         end
       end
     rescue => e
-      @logger.error("Uncaught processing exception in datadog forwarder #{e.message}")
+      if e.is_a?(InterruptedError)
+        raise e
+      else
+        @logger.error("Uncaught processing exception in datadog forwarder #{e.message}")
+      end
     end
   end
 
@@ -148,13 +152,16 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   # Build a new transport client
   def new_client(logger, api_key, use_http, use_ssl, no_ssl_validation, host, port, use_compression, force_v1_routes, http_proxy)
     if use_http
-      DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes, http_proxy
+      DatadogHTTPClient.new logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes, http_proxy, -> { defined?(pipeline_shutdown_requested?) ? pipeline_shutdown_requested? : false }
     else
       DatadogTCPClient.new logger, use_ssl, no_ssl_validation, host, port
     end
   end
 
   class RetryableError < StandardError;
+  end
+
+  class InterruptedError < StandardError;
   end
 
   class DatadogClient
@@ -166,15 +173,34 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       rescue RetryableError => e
         if retries < max_retries || max_retries < 0
           @logger.warn("Retrying send due to: #{e.message}")
-          sleep backoff
+          interruptableSleep(backoff)
           backoff = 2 * backoff unless backoff > max_backoff
           retries += 1
           retry
         end
-        @logger.error("Max number of retries reached, dropping message. Last exception: #{ex.message}")
+        @logger.error("Max number of retries reached, dropping message. Last exception: #{e.message}")
       rescue => ex
-        @logger.error("Unmanaged exception while sending log to datadog #{ex.message}")
+        if ex.is_a?(InterruptedError)
+          raise ex
+        else
+          @logger.error("Unmanaged exception while sending log to datadog #{ex.message}")
+        end
       end
+    end
+
+    def interruptableSleep(duration)
+      amountSlept = 0
+      while amountSlept < duration
+        sleep 1
+        amountSlept += 1
+        if interrupted?
+          raise InterruptedError.new "Interrupted while backing off"
+        end
+      end
+    end
+
+    def interrupted?
+      false
     end
 
     def send(payload)
@@ -196,7 +222,8 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         ::Manticore::ResolutionFailure
     ]
 
-    def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes, http_proxy)
+    def initialize(logger, use_ssl, no_ssl_validation, host, port, use_compression, api_key, force_v1_routes, http_proxy, interruptedLambda = nil)
+      @interruptedLambda = interruptedLambda
       @logger = logger
       protocol = use_ssl ? "https" : "http"
 
@@ -222,6 +249,14 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
         config[:proxy] = http_proxy
       end
       @client = Manticore::Client.new(config)
+    end
+
+    def interrupted?
+      if @interruptedLambda
+        return @interruptedLambda.call
+      end
+
+      false
     end
 
     def send(payload)

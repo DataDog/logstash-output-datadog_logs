@@ -1,3 +1,6 @@
+## 0.5.3
+  - Now is threadsafe: supports shared concurrency.
+
 ## 0.5.2
   - Now checks if logstash is being shutdown
 

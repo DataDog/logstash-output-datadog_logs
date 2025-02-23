@@ -21,6 +21,8 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   config_name "datadog_logs"
 
+  concurrency :shared
+
   default :codec, "json"
 
   # Datadog configuration parameters

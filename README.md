@@ -35,8 +35,8 @@ To enable TCP forwarding, configure your forwarder with:
 output {
     datadog_logs {
         api_key => "<DATADOG_API_KEY>"
-        host => "tcp-intake.logs.datadoghq.com"
-        port => 10516
+        host => "intake.logs.datadoghq.com"
+        port => 443
         use_http => false
     }
 }

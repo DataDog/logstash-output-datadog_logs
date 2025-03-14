@@ -49,11 +49,11 @@ jobs:
       matrix:
         logstash:
           - 5.6.16
-          - 6.8.22
+          - 6.8.23
           - 7.17.8
           - 8.6.1
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout plugin
         uses: actions/checkout@v3

@@ -64,12 +64,19 @@ jobs:
       - name: Install Logstash GPG-KEY
         run: curl -sS https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/elasticsearch.gpg
 
-      - name: Setup Java for Logstash 5.x and 6.x
-        if: ${{ startsWith(matrix.logstash, '5') || startsWith(matrix.logstash, '6') }}
+      - name: Setup Logstash 5.x Java version to JDK 8
+        if: ${{ startsWith(matrix.logstash, '5') }}
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '8'
+      
+      - name: Setup Java for Logstash 6.x
+        if: ${{ startsWith(matrix.logstash, '6') }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Setup Logstash 5.x repo
         if: ${{ startsWith(matrix.logstash, '5') }}

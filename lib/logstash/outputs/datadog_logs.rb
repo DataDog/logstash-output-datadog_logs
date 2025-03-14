@@ -21,6 +21,8 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   config_name "datadog_logs"
 
+  concurrency :shared
+
   default :codec, "json"
 
   # Datadog configuration parameters
@@ -298,6 +300,7 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
       @no_ssl_validation = no_ssl_validation
       @host = host
       @port = port
+      @send_mutex = Mutex.new
     end
 
     def connect
@@ -318,13 +321,15 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
     end
 
     def send(payload)
-      begin
-        @socket ||= connect
-        @socket.puts(payload)
-      rescue => e
-        @socket.close rescue nil
-        @socket = nil
-        raise RetryableError.new "Unable to send payload: #{e.message}."
+      @send_mutex.synchronize do
+        begin
+          @socket ||= connect
+          @socket.puts(payload)
+        rescue => e
+          @socket.close rescue nil
+          @socket = nil
+          raise RetryableError.new "Unable to send payload: #{e.message}."
+        end
       end
     end
 

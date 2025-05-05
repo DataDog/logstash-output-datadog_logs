@@ -1,0 +1,17 @@
+{
+    "name": "Logstash Plugin Dev",
+    "dockerFile": "Dockerfile",
+    "remoteUser": "root",
+    "postCreateCommand": "chmod +x .devcontainer/startup.sh && .devcontainer/startup.sh",
+    "remoteEnv": {
+        "PATH": "/usr/share/logstash/vendor/jruby/bin:/usr/share/logstash/jdk/bin:${containerEnv:PATH}"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rebornix.ruby",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    }
+}

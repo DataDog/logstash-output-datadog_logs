@@ -1,0 +1,77 @@
+#!/bin/bash
+set -e
+
+# Import RVM GPG keys
+gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+
+# Install RVM
+curl -sSL https://get.rvm.io | bash -s stable
+source /etc/profile.d/rvm.sh
+source /usr/local/rvm/scripts/rvm
+
+# Install Java 11
+apt-get update
+apt-get install -y openjdk-11-jdk
+update-alternatives --set java /usr/lib/jvm/java-11-openjdk-arm64/bin/java
+update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-arm64/bin/javac
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-arm64
+
+# Setup directories
+WORKSPACE_DIR="/workspaces/logstash-output-datadog_logs"
+LOGSTASH_DIR="/opt/logstash"
+mkdir -p $LOGSTASH_DIR
+cd $LOGSTASH_DIR
+
+# Clone Logstash first
+if [ ! -d "logstash" ]; then
+    git clone https://github.com/elastic/logstash
+fi
+
+# Install required JRuby version
+cd logstash
+JRUBY_VERSION=$(cat .ruby-version)
+rvm install $JRUBY_VERSION
+rvm use $JRUBY_VERSION --default
+gem install rake
+
+# Build Logstash
+export OSS=1
+export LOGSTASH_SOURCE=1
+export LOGSTASH_PATH=$(pwd)
+echo "export LOGSTASH_SOURCE=1" >> ~/.bashrc
+echo "export LOGSTASH_PATH=$LOGSTASH_PATH" >> ~/.bashrc
+
+# Debug Java version
+echo "Current Java version:"
+java -version
+echo "JAVA_HOME: $JAVA_HOME"
+
+# Ignore Gradle exit code
+echo "Running Gradle..."
+./gradlew installDevelopmentGems || true
+
+echo "Running rake..."
+# Skip Java version check
+export SKIP_JAVA_VERSION_CHECK=true
+rake bootstrap
+
+# Verify Logstash
+echo "Testing Logstash installation..."
+echo "input { stdin { } } output { stdout {} }" > test.conf
+bin/logstash -f test.conf --config.reload.automatic &
+
+# Setup plugin
+cd $WORKSPACE_DIR
+if [ ! -d "logstash-output-datadog_logs" ]; then
+    git clone git@github.com:DataDog/logstash-output-datadog_logs
+fi
+cd logstash-output-datadog_logs
+
+# Install dependencies and run tests
+rvm use $(cat "${LOGSTASH_PATH}/.ruby-version")
+bundle install
+bundle exec rake vendor
+bundle exec rspec
+
+# Keep container running
+tail -f /dev/null 

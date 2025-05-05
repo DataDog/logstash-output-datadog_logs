@@ -1,5 +1,6 @@
 ## 0.5.3
   - Now is threadsafe: supports shared concurrency.
+  - Increase `DD_MAX_BATCH_LENGTH` to `1000`
 
 ## 0.5.2
   - Now checks if logstash is being shutdown

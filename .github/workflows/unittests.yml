@@ -71,6 +71,27 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
 
+      - name: Setup Logstash 6.x Java version to JDK 11
+        if: ${{ startsWith(matrix.logstash, '6') }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup Logstash 7.x Java version to JDK 11
+        if: ${{ startsWith(matrix.logstash, '7') }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup Logstash 8.x Java version to JDK 17
+        if: ${{ startsWith(matrix.logstash, '8') }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Setup Logstash 5.x repo
         if: ${{ startsWith(matrix.logstash, '5') }}
         run: echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list

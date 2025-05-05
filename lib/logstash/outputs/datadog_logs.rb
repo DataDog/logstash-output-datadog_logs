@@ -14,8 +14,8 @@ require_relative "version"
 # based on LogStash events.
 class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
-  # Respect limit documented at https://docs.datadoghq.com/api/?lang=bash#logs
-  DD_MAX_BATCH_LENGTH = 500
+  # Respect limit documented at https://docs.datadoghq.com/api/latest/logs/#send-logs
+  DD_MAX_BATCH_LENGTH = 1000
   DD_MAX_BATCH_SIZE = 5000000
   DD_TRUNCATION_SUFFIX = "...TRUNCATED..."
 

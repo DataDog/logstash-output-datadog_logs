@@ -53,7 +53,7 @@ jobs:
           - 7.17.8
           - 8.6.1
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-21.04
     steps:
       - name: Checkout plugin
         uses: actions/checkout@v3
@@ -70,27 +70,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '8'
-
-      - name: Setup Logstash 6.x Java version to JDK 11
-        if: ${{ startsWith(matrix.logstash, '6') }}
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
-      - name: Setup Logstash 7.x Java version to JDK 11
-        if: ${{ startsWith(matrix.logstash, '7') }}
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
-      - name: Setup Logstash 8.x Java version to JDK 17
-        if: ${{ startsWith(matrix.logstash, '8') }}
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
 
       - name: Setup Logstash 5.x repo
         if: ${{ startsWith(matrix.logstash, '5') }}

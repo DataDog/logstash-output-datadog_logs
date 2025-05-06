@@ -35,7 +35,7 @@ To enable TCP forwarding, configure your forwarder with:
 output {
     datadog_logs {
         api_key => "<DATADOG_API_KEY>"
-        host => "intake.logs.datadoghq.com"
+        host => "http-intake.logs.datadoghq.com"
         port => 443
         use_http => false
     }
@@ -58,7 +58,7 @@ output {
 |  Property   |  Description                                                             |  Default value |
 |-------------|--------------------------------------------------------------------------|----------------|
 | **api_key** | The API key of your Datadog platform | nil |
-| **host** | Endpoint when logs are not directly forwarded to Datadog | intake.logs.datadoghq.com |
+| **host** | Endpoint when logs are not directly forwarded to Datadog | http-intake.logs.datadoghq.com |
 | **port** | Port when logs are not directly forwarded to Datadog | 443 |
 | **use_ssl** | If true, the agent initializes a secure connection to Datadog. Ensure to update the port if you disable it. | true |
 | **max_retries** | The number of retries before the output plugin stops | 5 |

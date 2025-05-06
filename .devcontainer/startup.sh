@@ -50,28 +50,14 @@ export LOGSTASH_PATH=$(pwd)
 echo "export LOGSTASH_SOURCE=1" >> ~/.bashrc
 echo "export LOGSTASH_PATH=$LOGSTASH_PATH" >> ~/.bashrc
 
-# Debug Java version
-echo "Current Java version:"
-java -version
-echo "JAVA_HOME: $JAVA_HOME"
-
-# Ignore Gradle exit code
 echo "Running Gradle..."
 ./gradlew installDevelopmentGems
 
 echo "Running rake..."
 rake bootstrap
 
-# Verify Logstash
-echo "Testing Logstash installation..."
-echo "input { stdin { } } output { stdout {} }" > test.conf
-bin/logstash -f test.conf --config.reload.automatic &
-
 # Setup plugin
 cd $WORKSPACE_DIR
-if [ ! -d "logstash-output-datadog_logs" ]; then
-    git clone git@github.com:DataDog/logstash-output-datadog_logs
-fi
 cd logstash-output-datadog_logs
 
 # Install dependencies and run tests

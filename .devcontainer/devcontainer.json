@@ -2,7 +2,7 @@
     "name": "Logstash Plugin Dev",
     "dockerFile": "Dockerfile",
     "remoteUser": "root",
-    "postCreateCommand": "chmod +x .devcontainer/startup.sh && .devcontainer/startup.sh",
+    "postCreateCommand": ".devcontainer/post-launch.sh",
     "remoteEnv": {
         "PATH": "/usr/share/logstash/vendor/jruby/bin:/usr/share/logstash/jdk/bin:${containerEnv:PATH}"
     },

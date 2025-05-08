@@ -1,4 +1,7 @@
 ## 0.5.3
+ - Fix `no_ssl_validation` preventing the plugin from starting
+
+## 0.5.3
   - Now is threadsafe: supports shared concurrency.
   - Increase `DD_MAX_BATCH_LENGTH` to `1000`
 

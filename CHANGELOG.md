@@ -1,5 +1,5 @@
 ## 0.5.3
- - Fix `no_ssl_validation` preventing the plugin from starting
+ - Fix issue where setting `no_ssl_validation` prevented the plugin from starting.
 
 ## 0.5.3
   - Now is threadsafe: supports shared concurrency.

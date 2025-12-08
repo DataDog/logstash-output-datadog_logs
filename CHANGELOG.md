@@ -1,4 +1,4 @@
-## 0.5.3
+## 0.5.4
  - Fix issue where setting `no_ssl_validation` prevented the plugin from starting.
 
 ## 0.5.3

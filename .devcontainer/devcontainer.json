@@ -4,7 +4,7 @@
     "remoteUser": "root",
     "postCreateCommand": ".devcontainer/post-launch.sh",
     "remoteEnv": {
-        "PATH": "/usr/share/logstash/vendor/jruby/bin:/usr/share/logstash/jdk/bin:${containerEnv:PATH}"
+        "PATH": "/usr/local/rvm/bin:/usr/local/rvm/rubies/default/bin:/usr/local/rvm/gems/default/bin:/bin:/usr/bin:${containerEnv:PATH}"
     },
     "customizations": {
         "vscode": {

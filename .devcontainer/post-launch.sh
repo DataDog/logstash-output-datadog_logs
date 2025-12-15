@@ -2,14 +2,9 @@
 set -e
 
 # Setup plugin
-cd /workspaces/logstash-output-datadog_logs/logstash-output-datadog_logs
-
-# Use correct JRuby version
-source /etc/profile.d/rvm.sh
-source /usr/local/rvm/scripts/rvm
-rvm use $(cat "${LOGSTASH_PATH}/.ruby-version")
-
-# Install dependencies and run tests
+cd /workspaces/logstash-output-datadog_logs
+echo "rvm_silence_path_mismatch_check_flag=1" >> /etc/profile.d/rvm.sh
+echo "rvm use $(cat /opt/logstash/logstash/.ruby-version)" >> /etc/bash.bashrc
+source ~/.bashrc
 bundle install
 bundle exec rake vendor
-bundle exec rspec 

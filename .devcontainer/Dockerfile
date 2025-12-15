@@ -14,9 +14,9 @@ RUN gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A170
     curl -sSL https://get.rvm.io | bash -s stable
 
 # Setup RVM environment
-ENV PATH="/usr/local/rvm/bin:/usr/local/rvm/rubies/default/bin:/usr/local/rvm/gems/default/bin:${PATH}"
-RUN bash -c 'echo "source /etc/profile.d/rvm.sh" >> /etc/profile && \
-    echo "source /usr/local/rvm/scripts/rvm" >> /etc/profile'
+RUN bash -c 'echo "export rvm_silence_path_mismatch_check_flag=1" >> /etc/profile.d/rvm.sh && \
+    echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc && echo "source /etc/profile.d/rvm.sh" >> /etc/profile && \
+    echo "source /usr/local/rvm/scripts/rvm" >> /etc/bash.bashrc && echo "source /usr/local/rvm/scripts/rvm" >> /etc/profile'
 
 # Setup Java
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64

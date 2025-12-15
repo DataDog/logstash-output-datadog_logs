@@ -24,8 +24,8 @@ jobs:
       - name: Install Logstash GPG-KEY
         run: curl -sS https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/elasticsearch.gpg
 
-      - name: Setup Logstash 8.x repo
-        run: echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list
+      - name: Setup Logstash 9.x repo
+        run: echo "deb https://artifacts.elastic.co/packages/9.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list
 
       - name: Install Logstash
         run: sudo apt-get update && sudo apt-get install logstash
@@ -48,10 +48,9 @@ jobs:
     strategy:
       matrix:
         logstash:
-          - 5.6.16
-          - 6.8.23
           - 7.17.8
           - 8.6.1
+          - 9.2.2
       fail-fast: false
     runs-on: ubuntu-22.04
     steps:
@@ -64,21 +63,6 @@ jobs:
       - name: Install Logstash GPG-KEY
         run: curl -sS https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/elasticsearch.gpg
 
-      - name: Setup Logstash 5.x Java version to JDK 8
-        if: ${{ startsWith(matrix.logstash, '5') }}
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '8'
-
-      - name: Setup Logstash 5.x repo
-        if: ${{ startsWith(matrix.logstash, '5') }}
-        run: echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
-
-      - name: Setup Logstash 6.x repo
-        if: ${{ startsWith(matrix.logstash, '6') }}
-        run: echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
-
       - name: Setup Logstash 7.x repo
         if: ${{ startsWith(matrix.logstash, '7') }}
         run: echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
@@ -86,6 +70,10 @@ jobs:
       - name: Setup Logstash 8.x repo
         if: ${{ startsWith(matrix.logstash, '8') }}
         run: echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list
+      
+      - name: Setup Logstash 9.x repo
+        if: ${{ startsWith(matrix.logstash, '9') }}
+        run: echo "deb https://artifacts.elastic.co/packages/9.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-9.x.list
 
       - name: Install Logstash
         run: sudo apt-get update && sudo apt-get install logstash=1:${{ matrix.logstash }}-1
@@ -109,5 +97,7 @@ jobs:
 
       - name: Run Logstash
         run: |
+            sudo chown -R $USER: /usr/share/logstash
             sleep 20 && echo 'this is a log' >> /tmp/logfile.log&
-            sudo -E timeout 30s /usr/share/logstash/bin/logstash -r -f "/tmp/test.conf" || test "$?" -eq 124
+            timeout 30s /usr/share/logstash/bin/logstash -r -f "/tmp/test.conf" 2>&1 | tee /tmp/logstash.log
+            grep -q 'datadoglogs - Unable to send payload due to client error: 403 {"errors":\[{"status":"403","title":"Forbidden","detail":"API key is invalid"' /tmp/logstash.log

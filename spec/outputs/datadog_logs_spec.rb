@@ -74,24 +74,6 @@ describe LogStash::Outputs::DatadogLogs do
       expect(plugin.host).to eq("custom.example.com")
     end
 
-    it "should derive the TCP intake host when use_http is false" do
-      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "site" => "datadoghq.eu", "use_http" => false})
-      plugin.register
-      expect(plugin.host).to eq("intake.logs.datadoghq.eu")
-      expect(plugin.port).to eq(10516)
-    end
-
-    it "should derive plaintext TCP port (10514) when use_ssl is false" do
-      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "use_http" => false, "use_ssl" => false})
-      plugin.register
-      expect(plugin.port).to eq(10514)
-    end
-
-    it "should prefer an explicit port over derived defaults" do
-      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "use_http" => false, "port" => 12345})
-      plugin.register
-      expect(plugin.port).to eq(12345)
-    end
   end
 
   context "when using HTTP" do

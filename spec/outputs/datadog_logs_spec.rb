@@ -47,6 +47,53 @@ describe LogStash::Outputs::DatadogLogs do
     end
   end
 
+  context "when configuring `site`" do
+    it "should default host to http-intake.logs.datadoghq.com when site is unset" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx"})
+      plugin.register
+      expect(plugin.host).to eq("http-intake.logs.datadoghq.com")
+      expect(plugin.port).to eq(443)
+    end
+
+    it "should derive the EU HTTP host from site=datadoghq.eu" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "site" => "datadoghq.eu"})
+      plugin.register
+      expect(plugin.host).to eq("http-intake.logs.datadoghq.eu")
+      expect(plugin.port).to eq(443)
+    end
+
+    it "should derive the host from site for other sites" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "site" => "us5.datadoghq.com"})
+      plugin.register
+      expect(plugin.host).to eq("http-intake.logs.us5.datadoghq.com")
+    end
+
+    it "should prefer an explicit host over site" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "site" => "datadoghq.eu", "host" => "custom.example.com"})
+      plugin.register
+      expect(plugin.host).to eq("custom.example.com")
+    end
+
+    it "should derive the TCP intake host when use_http is false" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "site" => "datadoghq.eu", "use_http" => false})
+      plugin.register
+      expect(plugin.host).to eq("agent-intake.logs.datadoghq.eu")
+      expect(plugin.port).to eq(10516)
+    end
+
+    it "should derive plaintext TCP port (10514) when use_ssl is false" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "use_http" => false, "use_ssl" => false})
+      plugin.register
+      expect(plugin.port).to eq(10514)
+    end
+
+    it "should prefer an explicit port over derived defaults" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "use_http" => false, "port" => 12345})
+      plugin.register
+      expect(plugin.port).to eq(12345)
+    end
+  end
+
   context "when using HTTP" do
     it "should respect the batch length and create one batch of one event" do
       input_events = [[LogStash::Event.new({"message" => "dd"}), "dd"]]

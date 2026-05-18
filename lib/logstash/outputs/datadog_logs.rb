@@ -27,8 +27,9 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   # Datadog configuration parameters
   config :api_key, :validate => :string, :required => true
-  config :host, :validate => :string, :required => true, :default => "http-intake.logs.datadoghq.com"
-  config :port, :validate => :number, :required => true, :default => 443
+  config :site, :validate => :string, :required => false, :default => "datadoghq.com"
+  config :host, :validate => :string, :required => false
+  config :port, :validate => :number, :required => false
   config :use_ssl, :validate => :boolean, :required => true, :default => true
   config :max_backoff, :validate => :number, :required => true, :default => 30
   config :max_retries, :validate => :number, :required => true, :default => 5
@@ -42,7 +43,33 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   # Register the plugin to logstash
   public
   def register
+    # Derive host and port defaults from `site` if the user has not explicitly
+    # overridden them. An explicit `host`/`port` always wins over `site`.
+    @host ||= default_host_for(@site, @use_http)
+    @port ||= default_port_for(@use_http, @use_ssl)
     @client = new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression, @force_v1_routes, @http_proxy)
+  end
+
+  # Default intake host derived from the `site` config.
+  # HTTP intake: http-intake.logs.<site>
+  # TCP intake:  agent-intake.logs.<site>
+  def default_host_for(site, use_http)
+    if use_http
+      "http-intake.logs.#{site}"
+    else
+      "agent-intake.logs.#{site}"
+    end
+  end
+
+  # Default intake port derived from transport and TLS settings.
+  # HTTP: 443.
+  # TCP:  10516 with TLS, 10514 in plaintext.
+  def default_port_for(use_http, use_ssl)
+    if use_http
+      443
+    else
+      use_ssl ? 10516 : 10514
+    end
   end
 
   # Logstash shutdown hook

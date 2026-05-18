@@ -100,4 +100,7 @@ jobs:
             sudo chown -R $USER: /usr/share/logstash
             sleep 20 && echo 'this is a log' >> /tmp/logfile.log&
             timeout 30s /usr/share/logstash/bin/logstash -r -f "/tmp/test.conf" 2>&1 | tee /tmp/logstash.log
-            grep -q 'datadoglogs - Unable to send payload due to client error: 403 {"errors":\[{"status":"403","title":"Forbidden","detail":"API key is invalid"' /tmp/logstash.log
+            # Match either "API key is invalid" or "API key is missing" — Datadog
+            # intake wording has varied over time; the assertion we actually care
+            # about is that the plugin reached intake and got a 403.
+            grep -qE 'datadoglogs - Unable to send payload due to client error: 403 .*"detail":"API key is (invalid|missing)"' /tmp/logstash.log

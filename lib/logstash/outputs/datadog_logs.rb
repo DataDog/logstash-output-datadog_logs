@@ -52,12 +52,12 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   # Default intake host derived from the `site` config.
   # HTTP intake: http-intake.logs.<site>
-  # TCP intake:  agent-intake.logs.<site>
+  # TCP intake:  intake.logs.<site>
   def default_host_for(site, use_http)
     if use_http
       "http-intake.logs.#{site}"
     else
-      "agent-intake.logs.#{site}"
+      "intake.logs.#{site}"
     end
   end
 

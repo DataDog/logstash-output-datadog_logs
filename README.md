@@ -66,7 +66,7 @@ ignored for that field.
 |-------------|--------------------------------------------------------------------------|----------------|
 | **api_key** | The API key of your Datadog platform | nil |
 | **site** | Datadog site to forward logs to. The intake host is derived from this value when `host` is not explicitly set. Valid values: `datadoghq.com`, `datadoghq.eu`, `us3.datadoghq.com`, `us5.datadoghq.com`, `ap1.datadoghq.com`, `ddog-gov.com`. | datadoghq.com |
-| **host** | Intake host. When unset, defaults to `http-intake.logs.<site>` (HTTP) or `agent-intake.logs.<site>` (TCP). | derived from `site` |
+| **host** | Intake host. When unset, defaults to `http-intake.logs.<site>` (HTTP) or `intake.logs.<site>` (TCP). | derived from `site` |
 | **port** | Intake port. When unset, defaults to 443 (HTTP), 10516 (TCP+TLS), or 10514 (TCP plaintext). | derived from transport |
 | **use_ssl** | If true, the agent initializes a secure connection to Datadog. Ensure to update the port if you disable it. | true |
 | **max_retries** | The number of retries before the output plugin stops | 5 |

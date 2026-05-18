@@ -77,7 +77,7 @@ describe LogStash::Outputs::DatadogLogs do
     it "should derive the TCP intake host when use_http is false" do
       plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "site" => "datadoghq.eu", "use_http" => false})
       plugin.register
-      expect(plugin.host).to eq("agent-intake.logs.datadoghq.eu")
+      expect(plugin.host).to eq("intake.logs.datadoghq.eu")
       expect(plugin.port).to eq(10516)
     end
 

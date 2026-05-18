@@ -34,6 +34,11 @@ jobs:
         run: |
           echo "/usr/share/logstash/vendor/jruby/bin" >> $GITHUB_PATH
           echo "/usr/share/logstash/jdk/bin" >> $GITHUB_PATH
+          # Point JAVA_HOME at the JDK bundled with Logstash (currently 21).
+          # JRuby (which is also bundled with Logstash and compiled against the
+          # bundled JDK) honors JAVA_HOME; without this, the runner's default
+          # Java 17 is used and fails to load org.jruby.Main (class file v65).
+          echo "JAVA_HOME=/usr/share/logstash/jdk" >> $GITHUB_ENV
 
       - name: Run tests
         run: |

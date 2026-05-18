@@ -44,7 +44,10 @@ jobs:
         run: |
           sudo find /usr/share/logstash/vendor -type d -user root -exec sudo chown -R $USER: {} +
           gem install bundler
-          bundle install --with test ci
+          # Bundler 4.x removed the `--with` flag. Use the local config form
+          # (scoped to this checkout, not persisted) to enable the test+ci groups.
+          bundle config set --local with 'test ci'
+          bundle install
           bundle exec rake vendor
           bundle exec rspec
 

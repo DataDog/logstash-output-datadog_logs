@@ -43,9 +43,13 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   # Register the plugin to logstash
   public
   def register
-    # Derive the default host from `site` when the user has not set `host`
-    # explicitly. An explicit `host` always wins over `site`.
-    @host ||= "http-intake.logs.#{@site}"
+    if @use_http
+      # Derive the default HTTP intake host from `site` when the user has not
+      # set `host` explicitly. An explicit `host` always wins over `site`.
+      @host ||= "http-intake.logs.#{@site}"
+    elsif @host.nil?
+      raise LogStash::ConfigurationError, "`host` is required when `use_http => false` (set `host` to your TCP intake)"
+    end
     @client = new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression, @force_v1_routes, @http_proxy)
   end
 

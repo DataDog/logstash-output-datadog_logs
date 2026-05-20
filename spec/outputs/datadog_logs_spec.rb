@@ -204,6 +204,16 @@ describe LogStash::Outputs::DatadogLogs do
   end
 
   context "when using TCP" do
+    it "should raise ConfigurationError when use_http is false and host is not set" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "use_http" => false, "site" => "datadoghq.eu"})
+      expect { plugin.register }.to raise_error(LogStash::ConfigurationError, /`host` is required when `use_http => false`/)
+    end
+
+    it "should not raise an error when use_http is false and host is explicitly set" do
+      plugin = LogStash::Plugin.lookup("output", "datadog_logs").new({"api_key" => "xxx", "use_http" => false, "host" => "agent-intake.logs.datadoghq.eu", "port" => 10516})
+      expect { plugin.register }.to_not raise_error
+    end
+
     it "should re-encode events" do
       input_event = "{message=dd}"
       encoded_event = subject.format_tcp_event(input_event, "xxx", 1000)

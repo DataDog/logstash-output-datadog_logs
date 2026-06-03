@@ -42,24 +42,32 @@ output {
 }
 ```
 
-To send logs to the Datadog's EU HTTP endpoint, override the default `host`
+To send logs to a non-US Datadog site, set the `site` parameter. The plugin
+derives the correct intake host from `site` automatically:
 
 ```
 output {
     datadog_logs {
         api_key => "<DATADOG_API_KEY>"
-        host => "http-intake.logs.datadoghq.eu"
+        site => "datadoghq.eu"
     }
 }
 ```
+
+Valid `site` values: `datadoghq.com` (default), `datadoghq.eu`, `us3.datadoghq.com`,
+`us5.datadoghq.com`, `ap1.datadoghq.com`, `ddog-gov.com`.
+
+If you set an explicit `host` (and/or `port`), that value wins and `site` is
+ignored for that field.
 
 ### Configuration properties
 
 |  Property   |  Description                                                             |  Default value |
 |-------------|--------------------------------------------------------------------------|----------------|
 | **api_key** | The API key of your Datadog platform | nil |
-| **host** | Endpoint when logs are not directly forwarded to Datadog | http-intake.logs.datadoghq.com |
-| **port** | Port when logs are not directly forwarded to Datadog | 443 |
+| **site** | Datadog site to forward logs to. The intake host is derived from this value when `host` is not explicitly set. Valid values: `datadoghq.com`, `datadoghq.eu`, `us3.datadoghq.com`, `us5.datadoghq.com`, `ap1.datadoghq.com`, `ddog-gov.com`. | datadoghq.com |
+| **host** | Intake host. With `use_http => true` (default), defaults to `http-intake.logs.<site>` when unset. With `use_http => false`, `host` is required. | derived from `site` (HTTP); required (TCP) |
+| **port** | Intake port. | 443 |
 | **use_ssl** | If true, the agent initializes a secure connection to Datadog. Ensure to update the port if you disable it. | true |
 | **max_retries** | The number of retries before the output plugin stops | 5 |
 | **max_backoff** | The maximum time waited between each retry in seconds | 30 |

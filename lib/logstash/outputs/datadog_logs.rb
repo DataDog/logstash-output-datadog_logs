@@ -27,7 +27,8 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
 
   # Datadog configuration parameters
   config :api_key, :validate => :string, :required => true
-  config :host, :validate => :string, :required => true, :default => "http-intake.logs.datadoghq.com"
+  config :site, :validate => :string, :required => false, :default => "datadoghq.com"
+  config :host, :validate => :string, :required => false
   config :port, :validate => :number, :required => true, :default => 443
   config :use_ssl, :validate => :boolean, :required => true, :default => true
   config :max_backoff, :validate => :number, :required => true, :default => 30
@@ -42,6 +43,13 @@ class LogStash::Outputs::DatadogLogs < LogStash::Outputs::Base
   # Register the plugin to logstash
   public
   def register
+    if @use_http
+      # Derive the default HTTP intake host from `site` when the user has not
+      # set `host` explicitly. An explicit `host` always wins over `site`.
+      @host ||= "http-intake.logs.#{@site}"
+    elsif @host.nil?
+      raise LogStash::ConfigurationError, "`host` is required when `use_http => false` (set `host` to your TCP intake)"
+    end
     @client = new_client(@logger, @api_key, @use_http, @use_ssl, @no_ssl_validation, @host, @port, @use_compression, @force_v1_routes, @http_proxy)
   end
 

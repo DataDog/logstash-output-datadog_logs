@@ -23,6 +23,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: ruby/setup-ruby@d45b1a4e94b71acab930e56e79c6aa188764e7f9 # v1.316.0
         with:
           ruby-version: "3.3"
@@ -44,6 +46,14 @@ jobs:
           gem build logstash-output-datadog_logs.gemspec
           echo "::notice::Dry run complete. Gem built successfully: logstash-output-datadog_logs-${GEM_VERSION}.gem"
 
+      - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        if: ${{ inputs.push }}
+        id: octo-sts
+        with:
+          scope: DataDog/logstash-output-datadog_logs
+          policy: self.publish
       - name: Publish to RubyGems.org
         if: ${{ inputs.push }}
         uses: rubygems/release-gem@052cc82692552de3ef2b81fd670e41d13cba8092 # v1.4.0
+        with:
+          token: ${{ steps.octo-sts.outputs.token }}

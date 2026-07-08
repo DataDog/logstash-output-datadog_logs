@@ -99,6 +99,20 @@ filter {
 }
 ```
 
+## Releasing
+
+This gem is published to RubyGems via a GitHub Actions [Trusted Publishing](https://guides.rubygems.org/trusted-publishing/) workflow. No API keys or local credentials are needed.
+
+To release a new version:
+
+1. Update the version in `lib/logstash/outputs/version.rb`
+2. Update `CHANGELOG.md`
+3. Merge to `master`
+4. Go to **Actions** > **Publish gem** > **Run workflow**
+5. Run with `push` unchecked first (dry run) to verify the build
+6. Run again with `push` checked to publish to RubyGems
+7. The `rubygems.org` environment gate will ask for approval before publishing
+
 ## Need Help?
 
 If you need any support please contact us at support@datadoghq.com.

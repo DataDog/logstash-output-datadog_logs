@@ -111,4 +111,4 @@ jobs:
             # Match either "API key is invalid" or "API key is missing" — Datadog
             # intake wording has varied over time; the assertion we actually care
             # about is that the plugin reached intake and got a 403.
-            grep -qE 'datadoglogs - Unable to send payload due to client error: 403 .*"detail":"API key is (invalid|missing)"' /tmp/logstash.log
+            grep -qE 'datadoglogs - Unable to send payload due to client error: 403 .*API key is (invalid|missing)' /tmp/logstash.log

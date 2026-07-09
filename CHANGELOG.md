@@ -1,3 +1,6 @@
+## Unreleased
+ - Switch to GitHub Actions Trusted Publishing for gem releases (replaces manual API key publishing) [#64](https://github.com/DataDog/logstash-output-datadog_logs/pull/64)
+
 ## 0.5.4
  - Fix issue where setting `no_ssl_validation` prevented the plugin from starting.
 

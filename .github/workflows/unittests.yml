@@ -19,7 +19,7 @@ jobs:
       # LOGSTASH_PATH: ${{ github.workspace }}/logstash
     steps:
       - name: Checkout logstash-output-datadog_logs
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Install Logstash GPG-KEY
         run: curl -sS https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/elasticsearch.gpg
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout plugin
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Build Gem
         run: gem build logstash-output-datadog_logs.gemspec
